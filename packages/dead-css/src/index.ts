@@ -2,7 +2,6 @@ import * as path from 'node:path';
 import {
   scanFiles,
   readFileContent,
-  fileExists,
   createTable,
   colorize,
 } from '@ngtk/shared';
@@ -45,7 +44,20 @@ function extractDeclaredClasses(scssContent: string): string[] {
 
 function hasDynamicClassBinding(htmlContent: string): boolean {
   // [class]="expr" (not [class.x]="expr") indicates fully dynamic class assignment
-  return /\[class\]\s*=\s*"/.test(htmlContent);
+  if (/\[class\]\s*=\s*"/.test(htmlContent)) return true;
+
+  // [ngClass] with non-literal expressions (variables, ternaries, function calls) are too dynamic
+  const ngClassRegex = /\[ngClass\]\s*=\s*"([^"]*)"/gi;
+  let match: RegExpExecArray | null;
+  while ((match = ngClassRegex.exec(htmlContent)) !== null) {
+    const value = match[1].trim();
+    // Object literals, string literals, and array literals are safe to analyze
+    if (/^[{\[']/.test(value)) continue;
+    // Everything else (variables, ternaries, function calls) is dynamic
+    return true;
+  }
+
+  return false;
 }
 
 function extractUsedClasses(htmlContent: string): string[] {
@@ -131,9 +143,12 @@ export async function run(options: GlobalOptions): Promise<void> {
 
     // Find corresponding HTML template
     const htmlFile = styleFile.replace(/\.(?:scss|css)$/, '.html');
-    if (!fileExists(htmlFile)) continue;
-
-    const htmlContent = await readFileContent(htmlFile);
+    let htmlContent: string;
+    try {
+      htmlContent = await readFileContent(htmlFile);
+    } catch {
+      continue; // No HTML template found
+    }
 
     // Skip components with [class]="expr" binding — too dynamic to analyze
     if (hasDynamicClassBinding(htmlContent)) continue;
