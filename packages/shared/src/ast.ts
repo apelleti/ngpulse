@@ -1,4 +1,4 @@
-import { Project, SyntaxKind } from 'ts-morph';
+import { Project, SyntaxKind, type SourceFile, type ObjectLiteralExpression, type Expression } from 'ts-morph';
 import type { ComponentMeta, ServiceMeta } from './types';
 import { scanFiles } from './fs';
 
@@ -42,7 +42,7 @@ export async function getServices(rootDir: string, project?: Project): Promise<S
   return services;
 }
 
-function extractComponentMeta(sourceFile: any, filePath: string): ComponentMeta | null {
+function extractComponentMeta(sourceFile: SourceFile, filePath: string): ComponentMeta | null {
   const classes = sourceFile.getClasses();
   for (const cls of classes) {
     const decorator = cls.getDecorator('Component');
@@ -69,13 +69,13 @@ function extractComponentMeta(sourceFile: any, filePath: string): ComponentMeta 
   return null;
 }
 
-function extractServiceMeta(sourceFile: any, filePath: string): ServiceMeta | null {
+function extractServiceMeta(sourceFile: SourceFile, filePath: string): ServiceMeta | null {
   const classes = sourceFile.getClasses();
   for (const cls of classes) {
     const decorator = cls.getDecorator('Injectable');
     if (!decorator) continue;
 
-    const methods = cls.getMethods().map((m: any) => m.getName());
+    const methods = cls.getMethods().map((m) => m.getName());
     const args = decorator.getArguments();
     let providedIn: string | null = null;
 
@@ -96,26 +96,25 @@ function extractServiceMeta(sourceFile: any, filePath: string): ServiceMeta | nu
   return null;
 }
 
-function getPropString(obj: any, name: string): string | null {
-  const prop = obj.getProperty(name);
-  if (!prop) return null;
-  const init = prop.getInitializer?.();
+function getPropInitializer(obj: ObjectLiteralExpression, name: string): Expression | undefined {
+  const prop = obj.getProperty(name)?.asKind(SyntaxKind.PropertyAssignment);
+  return prop?.getInitializer();
+}
+
+function getPropString(obj: ObjectLiteralExpression, name: string): string | null {
+  const init = getPropInitializer(obj, name);
   if (!init) return null;
   return init.getText().replace(/^['"`]|['"`]$/g, '');
 }
 
-function getPropBool(obj: any, name: string): boolean {
-  const prop = obj.getProperty(name);
-  if (!prop) return false;
-  const init = prop.getInitializer?.();
+function getPropBool(obj: ObjectLiteralExpression, name: string): boolean {
+  const init = getPropInitializer(obj, name);
   if (!init) return false;
   return init.getText() === 'true';
 }
 
-function getPropStringArray(obj: any, name: string): string[] {
-  const prop = obj.getProperty(name);
-  if (!prop) return [];
-  const init = prop.getInitializer?.();
+function getPropStringArray(obj: ObjectLiteralExpression, name: string): string[] {
+  const init = getPropInitializer(obj, name);
   if (!init) return [];
   try {
     const arr = init.asKind(SyntaxKind.ArrayLiteralExpression);
@@ -124,7 +123,7 @@ function getPropStringArray(obj: any, name: string): string[] {
       const text = init.getText().replace(/^['"`]|['"`]$/g, '');
       return text ? [text] : [];
     }
-    return arr.getElements().map((e: any) => e.getText().replace(/^['"`]|['"`]$/g, ''));
+    return arr.getElements().map((e: Expression) => e.getText().replace(/^['"`]|['"`]$/g, ''));
   } catch {
     return [];
   }

@@ -124,11 +124,7 @@ export async function run(options: GlobalOptions): Promise<void> {
     const refs = extractReferences(content, tsFile);
     for (const ref of refs) {
       allRefs.add(ref);
-      // Also store basename without extension for .ts file matching
-      const ext = path.extname(ref);
-      if (ext) {
-        referencedBasenames.add(path.basename(ref));
-      }
+      // Store basename for loose matching (handles barrel re-exports)
       referencedBasenames.add(path.basename(ref));
     }
   }

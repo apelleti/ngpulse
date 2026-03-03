@@ -161,48 +161,31 @@ function extractMatchingBracket(content: string, openIndex: number): string | nu
   return null;
 }
 
-function renderTree(routes: RouteNode[], prefix: string = '', isRoot: boolean = true): string[] {
+function renderChildren(routes: RouteNode[], prefix: string): string[] {
+  const lines: string[] = [];
+  for (let i = 0; i < routes.length; i++) {
+    const isLast = i === routes.length - 1;
+    const connector = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
+    const childPrefix = isLast ? '    ' : '\u2502   ';
+
+    lines.push(prefix + connector + formatRouteNode(routes[i].path, routes[i]));
+    lines.push(...renderChildren(routes[i].children, prefix + childPrefix));
+  }
+  return lines;
+}
+
+function renderTree(routes: RouteNode[], prefix: string = ''): string[] {
   const lines: string[] = [];
 
-  if (isRoot && routes.length > 0) {
-    // Find or synthesize the root route
-    const rootRoute = routes.find((r) => r.path === '' || r.path === '/');
-    if (rootRoute) {
-      lines.push(formatRouteNode('/', rootRoute));
-      // Render root's children, plus other top-level routes
-      const otherRoutes = routes.filter((r) => r !== rootRoute);
-      const allChildren = [...rootRoute.children, ...otherRoutes];
-      for (let i = 0; i < allChildren.length; i++) {
-        const isLast = i === allChildren.length - 1;
-        const connector = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
-        const childPrefix = isLast ? '    ' : '\u2502   ';
-
-        lines.push(prefix + connector + formatRouteNode(allChildren[i].path, allChildren[i]));
-        const childLines = renderTree(allChildren[i].children, prefix + childPrefix, false);
-        lines.push(...childLines);
-      }
-    } else {
-      // No root route, render all at top level
-      for (let i = 0; i < routes.length; i++) {
-        const isLast = i === routes.length - 1;
-        const connector = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
-        const childPrefix = isLast ? '    ' : '\u2502   ';
-
-        lines.push(prefix + connector + formatRouteNode(routes[i].path, routes[i]));
-        const childLines = renderTree(routes[i].children, prefix + childPrefix, false);
-        lines.push(...childLines);
-      }
-    }
+  // Find root route (path '' or '/') and render it as tree root
+  const rootRoute = routes.find((r) => r.path === '' || r.path === '/');
+  if (rootRoute) {
+    lines.push(formatRouteNode('/', rootRoute));
+    const otherRoutes = routes.filter((r) => r !== rootRoute);
+    const allChildren = [...rootRoute.children, ...otherRoutes];
+    lines.push(...renderChildren(allChildren, prefix));
   } else {
-    for (let i = 0; i < routes.length; i++) {
-      const isLast = i === routes.length - 1;
-      const connector = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
-      const childPrefix = isLast ? '    ' : '\u2502   ';
-
-      lines.push(prefix + connector + formatRouteNode(routes[i].path, routes[i]));
-      const childLines = renderTree(routes[i].children, prefix + childPrefix, false);
-      lines.push(...childLines);
-    }
+    lines.push(...renderChildren(routes, prefix));
   }
 
   return lines;

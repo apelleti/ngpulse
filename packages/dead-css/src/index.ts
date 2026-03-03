@@ -8,6 +8,14 @@ import {
 } from '@ngtk/shared';
 import type { GlobalOptions, DeadCssResult } from '@ngtk/shared';
 
+const PSEUDO_CLASSES = new Set([
+  'hover', 'focus', 'active', 'visited', 'first-child', 'last-child',
+  'nth-child', 'not', 'before', 'after', 'placeholder', 'disabled',
+  'enabled', 'checked', 'invalid', 'valid', 'required', 'optional',
+  'first-of-type', 'last-of-type', 'only-child', 'empty', 'root',
+  'focus-within', 'focus-visible', 'is', 'where', 'has',
+]);
+
 function extractDeclaredClasses(scssContent: string): string[] {
   const classes = new Set<string>();
 
@@ -27,15 +35,7 @@ function extractDeclaredClasses(scssContent: string): string[] {
   let match: RegExpExecArray | null;
   while ((match = classRegex.exec(content)) !== null) {
     const className = match[1];
-    // Exclude known pseudo-classes and SCSS built-ins
-    const pseudoClasses = new Set([
-      'hover', 'focus', 'active', 'visited', 'first-child', 'last-child',
-      'nth-child', 'not', 'before', 'after', 'placeholder', 'disabled',
-      'enabled', 'checked', 'invalid', 'valid', 'required', 'optional',
-      'first-of-type', 'last-of-type', 'only-child', 'empty', 'root',
-      'focus-within', 'focus-visible', 'is', 'where', 'has',
-    ]);
-    if (!pseudoClasses.has(className)) {
+    if (!PSEUDO_CLASSES.has(className)) {
       classes.add(className);
     }
   }

@@ -45,11 +45,21 @@ function stripAnsi(s: string): string {
   return s.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
-export function colorize(
-  text: string,
-  color: 'red' | 'green' | 'yellow' | 'blue' | 'cyan' | 'magenta' | 'gray' | 'white',
-): string {
-  return (chalk as any)[color](text);
+type ChalkColor = 'red' | 'green' | 'yellow' | 'blue' | 'cyan' | 'magenta' | 'gray' | 'white';
+
+const colorFns: Record<ChalkColor, (text: string) => string> = {
+  red: chalk.red,
+  green: chalk.green,
+  yellow: chalk.yellow,
+  blue: chalk.blue,
+  cyan: chalk.cyan,
+  magenta: chalk.magenta,
+  gray: chalk.gray,
+  white: chalk.white,
+};
+
+export function colorize(text: string, color: ChalkColor): string {
+  return colorFns[color](text);
 }
 
 export function formatBytes(bytes: number): string {
