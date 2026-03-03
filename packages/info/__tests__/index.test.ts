@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,13 +17,27 @@ describe('@ngtk/info', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and returns expected structure', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    // Versions
+    expect(data.versions.angular).toContain('17');
+    expect(data.versions.typescript).toContain('5.4');
+    expect(data.versions.node).toMatch(/^v?\d+/);
+
+    // Counts — fixture has at least app, header, footer, sidebar components
+    expect(data.counts.components).toBeGreaterThanOrEqual(4);
+    expect(data.counts.services).toBeGreaterThanOrEqual(2);
+    expect(data.counts.pipes).toBeGreaterThanOrEqual(1);
+    expect(data.counts.guards).toBeGreaterThanOrEqual(1);
+
+    // Package manager detection
+    expect(typeof data.packageManager).toBe('string');
   });
 
-  it('runs in text mode without error', async () => {
+  it('runs in text mode and shows box drawing', async () => {
     await run({ root: FIXTURES, json: false, verbose: false });
     expect(output.length).toBeGreaterThan(0);
   });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,10 +17,25 @@ describe('@ngtk/empty-barrel', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and detects boilerplate files', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    // Should find at least:
+    // - footer.component.scss (empty style)
+    // - footer.component.html (empty template)
+    // - empty.service.ts (empty service)
+    expect(data.length).toBeGreaterThanOrEqual(3);
+
+    const types = data.map((r: any) => r.type);
+    expect(types).toContain('empty-style');
+    expect(types).toContain('empty-template');
+    expect(types).toContain('empty-service');
+
+    // Verify empty service detection
+    const emptyService = data.find((r: any) => r.type === 'empty-service');
+    expect(emptyService.filePath).toContain('empty.service');
   });
 
   it('runs in text mode without error', async () => {

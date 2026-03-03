@@ -1,4 +1,5 @@
-import { execSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import * as path from 'node:path';
 import {
   type GlobalOptions,
@@ -8,6 +9,8 @@ import {
   createTable,
   colorize,
 } from '@ngtk/shared';
+
+const execFileAsync = promisify(execFile);
 
 const SINGLE_LINE_RE = /\/\/\s*(TODO|FIXME|HACK)\b:?\s*(.*)/i;
 const BLOCK_COMMENT_RE = /\/\*\s*(TODO|FIXME|HACK)\b:?\s*(.*?)\*\//i;
@@ -36,54 +39,58 @@ interface BlameLineInfo {
   author?: string;
 }
 
-function getBlameInfoForFile(
-  filePath: string,
-): Map<number, BlameLineInfo> {
+function parseBlameOutput(output: string): Map<number, BlameLineInfo> {
   const result = new Map<number, BlameLineInfo>();
-  try {
-    const output = execSync(
-      `git blame --porcelain "${filePath}"`,
-      { encoding: 'utf-8', timeout: 15000, stdio: ['pipe', 'pipe', 'pipe'] },
-    );
+  let currentLine: number | undefined;
+  let author: string | undefined;
+  let authorTime: number | undefined;
 
-    let currentLine: number | undefined;
-    let author: string | undefined;
-    let authorTime: number | undefined;
-
-    for (const blameLine of output.split('\n')) {
-      // Header line: <hash> <orig-line> <final-line> [<num-lines>]
-      const headerMatch = blameLine.match(/^[0-9a-f]{40}\s+\d+\s+(\d+)/);
-      if (headerMatch) {
-        // Save previous entry
-        if (currentLine !== undefined) {
-          result.set(currentLine, {
-            age: authorTime !== undefined ? formatAge(authorTime) : undefined,
-            author: author === 'Not Committed Yet' ? undefined : author,
-          });
-        }
-        currentLine = parseInt(headerMatch[1], 10);
-        author = undefined;
-        authorTime = undefined;
+  for (const blameLine of output.split('\n')) {
+    // Header line: <hash> <orig-line> <final-line> [<num-lines>]
+    const headerMatch = blameLine.match(/^[0-9a-f]{40}\s+\d+\s+(\d+)/);
+    if (headerMatch) {
+      // Save previous entry
+      if (currentLine !== undefined) {
+        result.set(currentLine, {
+          age: authorTime !== undefined ? formatAge(authorTime) : undefined,
+          author: author === 'Not Committed Yet' ? undefined : author,
+        });
       }
-      if (blameLine.startsWith('author ')) {
-        author = blameLine.slice('author '.length).trim();
-      }
-      if (blameLine.startsWith('author-time ')) {
-        authorTime = parseInt(blameLine.slice('author-time '.length), 10);
-      }
+      currentLine = parseInt(headerMatch[1], 10);
+      author = undefined;
+      authorTime = undefined;
     }
-
-    // Save last entry
-    if (currentLine !== undefined) {
-      result.set(currentLine, {
-        age: authorTime !== undefined ? formatAge(authorTime) : undefined,
-        author: author === 'Not Committed Yet' ? undefined : author,
-      });
+    if (blameLine.startsWith('author ')) {
+      author = blameLine.slice('author '.length).trim();
     }
-  } catch {
-    // Not in a git repo or file not tracked
+    if (blameLine.startsWith('author-time ')) {
+      authorTime = parseInt(blameLine.slice('author-time '.length), 10);
+    }
+  }
+
+  // Save last entry
+  if (currentLine !== undefined) {
+    result.set(currentLine, {
+      age: authorTime !== undefined ? formatAge(authorTime) : undefined,
+      author: author === 'Not Committed Yet' ? undefined : author,
+    });
   }
   return result;
+}
+
+async function getBlameInfoForFile(
+  filePath: string,
+): Promise<Map<number, BlameLineInfo>> {
+  try {
+    const { stdout } = await execFileAsync(
+      'git', ['blame', '--porcelain', filePath],
+      { encoding: 'utf-8', timeout: 15000 },
+    );
+    return parseBlameOutput(stdout);
+  } catch {
+    // Not in a git repo or file not tracked
+    return new Map();
+  }
 }
 
 function truncate(text: string, maxLen: number): string {
@@ -124,7 +131,11 @@ export async function run(options: GlobalOptions): Promise<void> {
     '!**/dist/**',
   ]);
 
-  const items: DebtItem[] = [];
+  // Phase 1: Find all debt entries per file
+  const filesWithDebt: {
+    filePath: string;
+    entries: { lineNumber: number; type: DebtItem['type']; message: string }[];
+  }[] = [];
 
   for (const filePath of tsFiles) {
     let content: string;
@@ -135,7 +146,6 @@ export async function run(options: GlobalOptions): Promise<void> {
     }
 
     const lines = content.split('\n');
-    const debtLines: number[] = [];
     const debtEntries: { lineNumber: number; type: DebtItem['type']; message: string }[] = [];
 
     for (let i = 0; i < lines.length; i++) {
@@ -150,18 +160,28 @@ export async function run(options: GlobalOptions): Promise<void> {
       if (match) {
         const type = match[1].toUpperCase() as DebtItem['type'];
         const message = match[2].trim();
-        debtLines.push(lineNumber);
         debtEntries.push({ lineNumber, type, message });
       }
     }
 
-    if (debtEntries.length === 0) continue;
+    if (debtEntries.length > 0) {
+      filesWithDebt.push({ filePath, entries: debtEntries });
+    }
+  }
 
-    // Single git blame call per file instead of per line
-    const blameMap = getBlameInfoForFile(filePath);
+  // Phase 2: Parallel git blame for all files with debt
+  const blameMaps = await Promise.all(
+    filesWithDebt.map(({ filePath }) => getBlameInfoForFile(filePath)),
+  );
+
+  // Phase 3: Merge debt entries with blame info
+  const items: DebtItem[] = [];
+  for (let i = 0; i < filesWithDebt.length; i++) {
+    const { filePath, entries } = filesWithDebt[i];
+    const blameMap = blameMaps[i];
     const relativePath = path.relative(options.root, filePath);
 
-    for (const entry of debtEntries) {
+    for (const entry of entries) {
       const blame = blameMap.get(entry.lineNumber) ?? {};
       items.push({
         type: entry.type,

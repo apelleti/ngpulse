@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,10 +17,20 @@ describe('@ngtk/orphans', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and detects orphan.ts', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    // The fixture has an explicit orphan.ts file
+    const orphanPaths = data.map((o: any) => o.filePath);
+    expect(orphanPaths.some((p: string) => p.includes('orphan.ts'))).toBe(true);
+
+    // Every orphan should have size and extension
+    for (const orphan of data) {
+      expect(orphan.size).toBeGreaterThanOrEqual(0);
+      expect(orphan.extension).toBeTruthy();
+    }
   });
 
   it('runs in text mode without error', async () => {

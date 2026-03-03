@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,13 +17,27 @@ describe('@ngtk/debt-log', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and detects TODO/FIXME/HACK comments', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    // Fixtures contain TODO, FIXME, HACK comments in services and interceptors
+    expect(data.length).toBeGreaterThanOrEqual(3);
+
+    const types = data.map((item: any) => item.type);
+    expect(types).toContain('TODO');
+    expect(types).toContain('FIXME');
+    expect(types).toContain('HACK');
+
+    // Every item should have file and line
+    for (const item of data) {
+      expect(item.file).toBeTruthy();
+      expect(item.line).toBeGreaterThan(0);
+    }
   });
 
-  it('runs in text mode without error', async () => {
+  it('runs in text mode and shows table output', async () => {
     await run({ root: FIXTURES, json: false, verbose: false });
     expect(output.length).toBeGreaterThan(0);
   });

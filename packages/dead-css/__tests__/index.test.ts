@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,10 +17,20 @@ describe('@ngtk/dead-css', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and detects unused CSS classes', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    // app.component.scss has an .unused-class not referenced in app.component.html
+    const appResult = data.find((r: any) => r.component === 'app');
+    expect(appResult).toBeDefined();
+    expect(appResult.unused).toContain('unused-class');
+
+    // header.component.scss has .header-hidden not used in template
+    const headerResult = data.find((r: any) => r.component === 'header');
+    expect(headerResult).toBeDefined();
+    expect(headerResult.unused).toContain('header-hidden');
   });
 
   it('runs in text mode without error', async () => {

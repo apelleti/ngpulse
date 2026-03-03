@@ -4,6 +4,7 @@ import {
   type ComponentMeta,
   scanFiles,
   readFileContent,
+  createProject,
   getComponents,
   getServices,
   boxDraw,
@@ -112,8 +113,9 @@ async function gatherInfoData(options: GlobalOptions): Promise<InfoData> {
 
   const packageManager = await detectPackageManager(options.root);
 
-  const components = await getComponents(options.root);
-  const services = await getServices(options.root);
+  const project = createProject();
+  const components = await getComponents(options.root, project);
+  const services = await getServices(options.root, project);
 
   const pipes = await scanFiles(options.root, ['**/*.pipe.ts']);
   const directives = await scanFiles(options.root, ['**/*.directive.ts']);

@@ -34,6 +34,13 @@ function removeNestedBlocks(content: string): string {
   return result;
 }
 
+function stripStringLiterals(content: string): string {
+  return content
+    .replace(/'(?:[^'\\]|\\.)*'/g, "''")
+    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+    .replace(/`(?:[^`\\]|\\.)*`/g, '``');
+}
+
 function extractObjectKeys(content: string): string[] {
   const keys: string[] = [];
 
@@ -46,8 +53,11 @@ function extractObjectKeys(content: string): string[] {
 
   const body = objectMatch[1];
 
+  // Strip string literals first to avoid false matches from string content
+  const sanitized = stripStringLiterals(body);
+
   // Strip nested objects/arrays so we only extract top-level keys
-  const topLevel = removeNestedBlocks(body);
+  const topLevel = removeNestedBlocks(sanitized);
 
   // Match key-value pairs: key: value, or 'key': value, or "key": value
   // Handles keys followed by colons (standard object literal syntax)

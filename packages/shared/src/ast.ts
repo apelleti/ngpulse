@@ -2,14 +2,18 @@ import { Project, SyntaxKind } from 'ts-morph';
 import type { ComponentMeta, ServiceMeta } from './types';
 import { scanFiles } from './fs';
 
-export async function getComponents(rootDir: string): Promise<ComponentMeta[]> {
+export function createProject(): Project {
+  return new Project({ compilerOptions: { allowJs: true, strict: false } });
+}
+
+export async function getComponents(rootDir: string, project?: Project): Promise<ComponentMeta[]> {
   const files = await scanFiles(rootDir, ['**/*.component.ts']);
-  const project = new Project({ compilerOptions: { allowJs: true, strict: false } });
+  const proj = project ?? createProject();
   const components: ComponentMeta[] = [];
 
   for (const filePath of files) {
     try {
-      const sourceFile = project.addSourceFileAtPath(filePath);
+      const sourceFile = proj.addSourceFileAtPath(filePath);
       const meta = extractComponentMeta(sourceFile, filePath);
       if (meta) components.push(meta);
     } catch {
@@ -20,14 +24,14 @@ export async function getComponents(rootDir: string): Promise<ComponentMeta[]> {
   return components;
 }
 
-export async function getServices(rootDir: string): Promise<ServiceMeta[]> {
+export async function getServices(rootDir: string, project?: Project): Promise<ServiceMeta[]> {
   const files = await scanFiles(rootDir, ['**/*.service.ts']);
-  const project = new Project({ compilerOptions: { allowJs: true, strict: false } });
+  const proj = project ?? createProject();
   const services: ServiceMeta[] = [];
 
   for (const filePath of files) {
     try {
-      const sourceFile = project.addSourceFileAtPath(filePath);
+      const sourceFile = proj.addSourceFileAtPath(filePath);
       const meta = extractServiceMeta(sourceFile, filePath);
       if (meta) services.push(meta);
     } catch {

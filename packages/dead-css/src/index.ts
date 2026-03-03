@@ -18,6 +18,8 @@ function extractDeclaredClasses(scssContent: string): string[] {
   // Remove strings to avoid false matches
   content = content.replace(/'[^']*'/g, '""');
   content = content.replace(/"[^"]*"/g, '""');
+  // Remove @extend references (these are usages, not declarations)
+  content = content.replace(/@extend\s+\.[a-zA-Z_][\w-]*/g, '');
 
   // Match CSS class selectors: .className (possibly followed by braces, comma, pseudo-selector, etc.)
   // Careful to avoid matching color hex values like .5rem, or @extend .class
@@ -112,20 +114,20 @@ function extractUsedClasses(htmlContent: string): string[] {
 }
 
 export async function run(options: GlobalOptions): Promise<void> {
-  const scssFiles = await scanFiles(options.root, ['**/*.component.scss']);
+  const styleFiles = await scanFiles(options.root, ['**/*.component.scss', '**/*.component.css']);
   const results: DeadCssResult[] = [];
 
-  for (const scssFile of scssFiles) {
-    const scssContent = await readFileContent(scssFile);
-    const declared = extractDeclaredClasses(scssContent);
+  for (const styleFile of styleFiles) {
+    const styleContent = await readFileContent(styleFile);
+    const declared = extractDeclaredClasses(styleContent);
 
     if (declared.length === 0) continue;
 
     // Find corresponding HTML template
-    const baseName = scssFile.replace(/\.scss$/, '.html');
-    if (!fileExists(baseName)) continue;
+    const htmlFile = styleFile.replace(/\.(?:scss|css)$/, '.html');
+    if (!fileExists(htmlFile)) continue;
 
-    const htmlContent = await readFileContent(baseName);
+    const htmlContent = await readFileContent(htmlFile);
     const used = extractUsedClasses(htmlContent);
 
     const usedSet = new Set(used);
@@ -133,11 +135,12 @@ export async function run(options: GlobalOptions): Promise<void> {
 
     if (unused.length === 0) continue;
 
-    const componentName = path.basename(scssFile, '.component.scss');
+    const ext = path.extname(styleFile);
+    const componentName = path.basename(styleFile, '.component' + ext);
 
     results.push({
       component: componentName,
-      filePath: path.relative(options.root, scssFile),
+      filePath: path.relative(options.root, styleFile),
       declared,
       used: used.filter((cls) => new Set(declared).has(cls)),
       unused,

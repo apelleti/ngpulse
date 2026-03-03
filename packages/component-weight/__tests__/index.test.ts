@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,13 +17,23 @@ describe('@ngtk/component-weight', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and returns component weights', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    // Should find at least 4 components (app, header, footer, sidebar)
+    expect(data.length).toBeGreaterThanOrEqual(4);
+
+    // Every component should have positive TS size
+    for (const component of data) {
+      expect(component.tsSize).toBeGreaterThan(0);
+      expect(component.totalSize).toBeGreaterThan(0);
+      expect(component.name).toBeTruthy();
+    }
   });
 
-  it('runs in text mode without error', async () => {
+  it('runs in text mode and shows table output', async () => {
     await run({ root: FIXTURES, json: false, verbose: false });
     expect(output.length).toBeGreaterThan(0);
   });

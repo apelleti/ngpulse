@@ -13,15 +13,19 @@ function parseRouteObjects(content: string): RouteNode[] {
 
   const routes: RouteNode[] = [];
 
-  // Find route arrays: Routes = [...] or routes: Routes = [...] or provideRouter([...])
-  // We'll look for array blocks that contain route-like objects
-  const routeArrayRegex = /(?:Routes\s*=\s*\[|routes\s*[:=]\s*(?:Routes\s*=\s*)?\[|provideRouter\s*\(\s*\[)([\s\S]*?)(?:\]\s*[;,)])/g;
-  let arrayMatch: RegExpExecArray | null;
+  // Find route array start positions using bracket counting instead of lazy regex
+  // (lazy regex fails when route objects contain nested brackets like canActivate: [...])
+  const startRegex = /(?:Routes\s*=\s*\[|routes\s*[:=]\s*(?:Routes\s*=\s*)?\[|provideRouter\s*\(\s*\[)/g;
+  let startMatch: RegExpExecArray | null;
 
-  while ((arrayMatch = routeArrayRegex.exec(cleaned)) !== null) {
-    const arrayContent = arrayMatch[1];
-    const parsed = parseRouteArray(arrayContent);
-    routes.push(...parsed);
+  while ((startMatch = startRegex.exec(cleaned)) !== null) {
+    // The [ is the last character of the match
+    const openIdx = startMatch.index + startMatch[0].length - 1;
+    const arrayContent = extractMatchingBracket(cleaned, openIdx);
+    if (arrayContent) {
+      const parsed = parseRouteArray(arrayContent);
+      routes.push(...parsed);
+    }
   }
 
   return routes;

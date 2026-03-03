@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,10 +17,21 @@ describe('@ngtk/component-catalog', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and lists components with metadata', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    expect(data.length).toBeGreaterThanOrEqual(4);
+
+    const names = data.map((c: any) => c.name);
+    expect(names).toContain('AppComponent');
+    expect(names).toContain('HeaderComponent');
+
+    // HeaderComponent is standalone
+    const header = data.find((c: any) => c.name === 'HeaderComponent');
+    expect(header.standalone).toBe(true);
+    expect(header.selector).toBe('app-header');
   });
 
   it('runs in text mode without error', async () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,10 +17,27 @@ describe('@ngtk/dep-map', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and categorizes dependencies', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    expect(data.length).toBeGreaterThan(0);
+
+    // Check Angular deps are categorized correctly
+    const angularCore = data.find((d: any) => d.name === '@angular/core');
+    expect(angularCore).toBeDefined();
+    expect(angularCore.category).toBe('angular');
+
+    // Check ecosystem dep
+    const rxjs = data.find((d: any) => d.name === 'rxjs');
+    expect(rxjs).toBeDefined();
+    expect(rxjs.category).toBe('ecosystem');
+
+    // Check typescript is dev dep
+    const ts = data.find((d: any) => d.name === 'typescript');
+    expect(ts).toBeDefined();
+    expect(ts.depType).toBe('devDependencies');
   });
 
   it('runs in text mode without error', async () => {

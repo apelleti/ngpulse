@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import { run } from '../src/index';
 
@@ -17,14 +17,33 @@ describe('@ngtk/env-compare', () => {
     console.log = originalLog;
   });
 
-  it('runs in JSON mode without error', async () => {
+  it('runs in JSON mode and detects correct keys and missing entries', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const jsonOutput = output.join('\n');
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
+    const data = JSON.parse(jsonOutput);
+
+    // Should find all 3 environment files
+    expect(data.files.length).toBe(3);
+
+    // Should detect common keys across all files
+    expect(data.keys).toContain('production');
+    expect(data.keys).toContain('apiUrl');
+
+    // environment.prod.ts should be missing keys that others have
+    const prodMissing = data.missing.find(
+      (m: any) => m.fileName === 'environment.prod.ts',
+    );
+    expect(prodMissing).toBeDefined();
+    expect(prodMissing.missingKeys).toContain('debug');
+
+    // staging has stagingOnly which others don't
+    expect(data.keys).toContain('stagingOnly');
   });
 
-  it('runs in text mode without error', async () => {
+  it('runs in text mode and shows table output', async () => {
     await run({ root: FIXTURES, json: false, verbose: false });
+    const text = output.join('\n');
+    expect(text).toContain('Environment File Comparison');
     expect(output.length).toBeGreaterThan(0);
   });
 });
