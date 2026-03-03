@@ -1,0 +1,48 @@
+.dashboard-container {
+  padding: 24px;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.count-display {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background: #e94560;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+}
+
+.active {
+  border: 2px solid green;
+}
+
+.highlighted {
+  background: yellow;
+}
+
+.list-styled {
+  list-style: disc;
+}
+
+.compact {
+  padding: 0;
+}
+
+.selected {
+  outline: 2px solid blue;
+}
+
+.dead-panel {
+  display: none;
+}
+
+.unused-widget {
+  opacity: 0;
+}

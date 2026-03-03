@@ -1,0 +1,12 @@
+.users-list {
+  padding: 16px;
+}
+
+.users-title {
+  font-size: 1.5rem;
+}
+
+.user-item {
+  padding: 8px;
+  &:hover { background: #f0f0f0; }
+}
