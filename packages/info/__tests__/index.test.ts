@@ -61,4 +61,14 @@ describe('@ngtk/info', () => {
     expect(data.standaloneRatio.standalone).toBeGreaterThanOrEqual(1);
     expect(data.standaloneRatio.total).toBeGreaterThanOrEqual(4);
   });
+
+  it('throws on missing package.json', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngtk-info-bad-'));
+    fs.writeFileSync(path.join(tmpDir, 'angular.json'), '{"projects":{}}');
+    try {
+      await expect(run({ root: tmpDir, json: true, verbose: false })).rejects.toThrow();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true });
+    }
+  });
 });

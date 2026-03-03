@@ -70,4 +70,15 @@ describe('@ngtk/dep-map', () => {
     expect(toastr).toBeDefined();
     expect(toastr.category).toBe('ecosystem');
   });
+
+  it('throws on malformed package.json', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngtk-dm-bad-'));
+    fs.writeFileSync(path.join(tmpDir, 'angular.json'), '{"projects":{}}');
+    fs.writeFileSync(path.join(tmpDir, 'package.json'), '{ INVALID }');
+    try {
+      await expect(run({ root: tmpDir, json: true, verbose: false })).rejects.toThrow();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true });
+    }
+  });
 });

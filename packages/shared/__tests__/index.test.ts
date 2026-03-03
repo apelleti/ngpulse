@@ -152,4 +152,18 @@ describe('@ngtk/shared', () => {
     const pkg = { dependencies: {} };
     expect(readVersionFromDeps(pkg, 'nonexistent')).toBe('not found');
   });
+
+  it('parseAngularWorkspace throws on malformed JSON', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngtk-badjson-'));
+    fs.writeFileSync(path.join(tmpDir, 'angular.json'), '{ INVALID JSON }}}');
+    try {
+      await expect(parseAngularWorkspace(tmpDir)).rejects.toThrow('Invalid JSON');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true });
+    }
+  });
+
+  it('formatBytes handles negative values', () => {
+    expect(formatBytes(-100)).toBe('0 B');
+  });
 });

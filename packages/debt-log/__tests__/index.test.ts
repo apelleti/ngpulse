@@ -73,4 +73,16 @@ describe('@ngtk/debt-log', () => {
       expect(item.message.length).toBeGreaterThan(0);
     }
   });
+
+  it('handles directory with no .ts files gracefully', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngtk-debt-empty-'));
+    fs.writeFileSync(path.join(tmpDir, 'angular.json'), '{"projects":{}}');
+    try {
+      await run({ root: tmpDir, json: true, verbose: false });
+      const data = JSON.parse(output.join('\n'));
+      expect(data).toEqual([]);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true });
+    }
+  });
 });

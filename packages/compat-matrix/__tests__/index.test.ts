@@ -75,4 +75,15 @@ describe('@ngtk/compat-matrix', () => {
     expect(node).toBeDefined();
     expect(node.currentVersion).toMatch(/^\d+\.\d+/);
   });
+
+  it('throws on malformed package.json', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngtk-compat-bad-'));
+    fs.writeFileSync(path.join(tmpDir, 'angular.json'), '{"projects":{}}');
+    fs.writeFileSync(path.join(tmpDir, 'package.json'), '{ NOT VALID JSON }');
+    try {
+      await expect(run({ root: tmpDir, json: true, verbose: false })).rejects.toThrow();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true });
+    }
+  });
 });
