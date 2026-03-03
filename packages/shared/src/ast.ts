@@ -6,7 +6,7 @@ export function createProject(): Project {
   return new Project({ compilerOptions: { allowJs: true, strict: false } });
 }
 
-export async function getComponents(rootDir: string, project?: Project): Promise<ComponentMeta[]> {
+export async function getComponents(rootDir: string, project?: Project, verbose = false): Promise<ComponentMeta[]> {
   const files = await scanFiles(rootDir, ['**/*.component.ts']);
   const proj = project ?? createProject();
   const components: ComponentMeta[] = [];
@@ -16,15 +16,17 @@ export async function getComponents(rootDir: string, project?: Project): Promise
       const sourceFile = proj.addSourceFileAtPath(filePath);
       const meta = extractComponentMeta(sourceFile, filePath);
       if (meta) components.push(meta);
-    } catch {
-      // skip files that can't be parsed
+    } catch (err) {
+      if (verbose) {
+        console.error(`Warning: could not parse ${filePath}: ${err instanceof Error ? err.message : err}`);
+      }
     }
   }
 
   return components;
 }
 
-export async function getServices(rootDir: string, project?: Project): Promise<ServiceMeta[]> {
+export async function getServices(rootDir: string, project?: Project, verbose = false): Promise<ServiceMeta[]> {
   const files = await scanFiles(rootDir, ['**/*.service.ts']);
   const proj = project ?? createProject();
   const services: ServiceMeta[] = [];
@@ -34,8 +36,10 @@ export async function getServices(rootDir: string, project?: Project): Promise<S
       const sourceFile = proj.addSourceFileAtPath(filePath);
       const meta = extractServiceMeta(sourceFile, filePath);
       if (meta) services.push(meta);
-    } catch {
-      // skip files that can't be parsed
+    } catch (err) {
+      if (verbose) {
+        console.error(`Warning: could not parse ${filePath}: ${err instanceof Error ? err.message : err}`);
+      }
     }
   }
 
