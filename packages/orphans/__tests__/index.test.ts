@@ -71,6 +71,22 @@ describe('@ngtk/orphans', () => {
     expect(orphanPaths.every((p: string) => !p.includes('/environments/'))).toBe(true);
   });
 
+  it('does not report files re-exported via barrel (index.ts)', async () => {
+    await run({ root: FIXTURES, json: true, verbose: false });
+    const data = JSON.parse(output.join('\n'));
+    const orphanPaths = data.map((o: any) => o.filePath);
+    // helpers.ts is re-exported via utils/index.ts, which is imported in app.module.ts
+    expect(orphanPaths.every((p: string) => !p.includes('helpers.ts'))).toBe(true);
+  });
+
+  it('does not report barrel index.ts files that are imported', async () => {
+    await run({ root: FIXTURES, json: true, verbose: false });
+    const data = JSON.parse(output.join('\n'));
+    const orphanPaths = data.map((o: any) => o.filePath);
+    // components/index.ts is imported by app.module.ts (from './components')
+    expect(orphanPaths.every((p: string) => !p.endsWith('components/index.ts'))).toBe(true);
+  });
+
   it('sorts orphans by size descending', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const data = JSON.parse(output.join('\n'));

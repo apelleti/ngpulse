@@ -70,14 +70,12 @@ describe('@ngtk/dead-css', () => {
     }
   });
 
-  it('detects dead CSS in dashboard component', async () => {
+  it('skips dashboard component (has dynamic [class] binding)', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const data = JSON.parse(output.join('\n'));
+    // dashboard.component.html uses [class]="'panel-' + theme" → skipped
     const dashResult = data.find((r: any) => r.component === 'dashboard');
-    if (dashResult) {
-      expect(dashResult.unused).toContain('dead-panel');
-      expect(dashResult.unused).toContain('unused-widget');
-    }
+    expect(dashResult).toBeUndefined();
   });
 
   it('sorts results by unused count descending', async () => {

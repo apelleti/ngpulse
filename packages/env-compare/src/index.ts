@@ -44,11 +44,18 @@ function stripStringLiterals(content: string): string {
 function extractObjectKeys(content: string): string[] {
   const keys: string[] = [];
 
-  // Match the exported environment object, supporting both `export const environment = { ... }`
-  // and `export const environment: SomeType = { ... }`
-  const objectMatch = content.match(
+  // Match the exported environment object, supporting:
+  // 1. `export const environment = { ... }`
+  // 2. `export const environment: SomeType = { ... }`
+  // 3. `export default { ... }`
+  let objectMatch = content.match(
     /export\s+const\s+\w+\s*(?::\s*[^=]+)?\s*=\s*\{([\s\S]*?)\};/,
   );
+  if (!objectMatch) {
+    objectMatch = content.match(
+      /export\s+default\s+\{([\s\S]*?)\};/,
+    );
+  }
   if (!objectMatch) return keys;
 
   const body = objectMatch[1];
@@ -71,6 +78,7 @@ function extractObjectKeys(content: string): string[] {
 }
 
 async function parseEnvFiles(root: string): Promise<EnvFileKeys[]> {
+  // Scan recursively — works for both standard Angular and Nx multi-project workspaces
   const envFiles = await scanFiles(root, ['**/environment*.ts']);
   const results: EnvFileKeys[] = [];
 

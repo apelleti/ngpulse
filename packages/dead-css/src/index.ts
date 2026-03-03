@@ -43,6 +43,11 @@ function extractDeclaredClasses(scssContent: string): string[] {
   return Array.from(classes);
 }
 
+function hasDynamicClassBinding(htmlContent: string): boolean {
+  // [class]="expr" (not [class.x]="expr") indicates fully dynamic class assignment
+  return /\[class\]\s*=\s*"/.test(htmlContent);
+}
+
 function extractUsedClasses(htmlContent: string): string[] {
   const classes = new Set<string>();
 
@@ -128,6 +133,10 @@ export async function run(options: GlobalOptions): Promise<void> {
     if (!fileExists(htmlFile)) continue;
 
     const htmlContent = await readFileContent(htmlFile);
+
+    // Skip components with [class]="expr" binding — too dynamic to analyze
+    if (hasDynamicClassBinding(htmlContent)) continue;
+
     const used = extractUsedClasses(htmlContent);
 
     const usedSet = new Set(used);

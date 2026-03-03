@@ -12,7 +12,6 @@ import type { GlobalOptions, OrphanFile } from '@ngtk/shared';
 const EXCLUDED_BASENAMES = new Set([
   'main.ts',
   'polyfills.ts',
-  'index.ts',
 ]);
 
 function isExcluded(filePath: string): boolean {
@@ -87,6 +86,20 @@ function extractReferences(content: string, filePath: string): Set<string> {
   while ((match = styleUrlRegex.exec(content)) !== null) {
     const resolved = resolveImportPath(match[1], filePath);
     refs.add(resolved);
+  }
+
+  // Match re-export statements: export { ... } from '...' and export * from '...'
+  const reExportRegex = /export\s+(?:\{[\s\S]*?\}|\*)\s+from\s+['"]([^'"]+)['"]/g;
+  while ((match = reExportRegex.exec(content)) !== null) {
+    const importPath = match[1];
+    if (importPath.startsWith('.')) {
+      const resolved = resolveImportPath(importPath, filePath);
+      refs.add(resolved);
+      refs.add(resolved + '.ts');
+      refs.add(resolved + '.js');
+      refs.add(path.join(resolved, 'index.ts'));
+      refs.add(path.join(resolved, 'index.js'));
+    }
   }
 
   // Match require() calls

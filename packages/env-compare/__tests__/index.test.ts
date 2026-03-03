@@ -85,6 +85,19 @@ describe('@ngtk/env-compare', () => {
     }
   });
 
+  it('detects keys from export default syntax', async () => {
+    await run({ root: FIXTURES, json: true, verbose: false });
+    const data = JSON.parse(output.join('\n'));
+    // environment.default.ts uses `export default { ... }` with defaultOnly key
+    expect(data.keys).toContain('defaultOnly');
+    const defaultMissing = data.missing.find(
+      (m: any) => m.fileName !== 'environment.default.ts',
+    );
+    if (defaultMissing) {
+      expect(defaultMissing.missingKeys).toContain('defaultOnly');
+    }
+  });
+
   it('matrix correctly maps each key presence per file', async () => {
     await run({ root: FIXTURES, json: true, verbose: false });
     const data = JSON.parse(output.join('\n'));
