@@ -43,6 +43,7 @@ export function boxDraw(title: string, lines: string[]): string {
 
 function stripAnsi(s: string): string {
   return s.replace(
+    // eslint-disable-next-line no-control-regex
     /[\u001B\u009B][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
     '',
   );

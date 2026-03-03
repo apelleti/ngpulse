@@ -52,7 +52,7 @@ function hasDynamicClassBinding(htmlContent: string): boolean {
   while ((match = ngClassRegex.exec(htmlContent)) !== null) {
     const value = match[1].trim();
     // Object literals, string literals, and array literals are safe to analyze
-    if (/^[{\[']/.test(value)) continue;
+    if (/^[{[']/.test(value)) continue;
     // Everything else (variables, ternaries, function calls) is dynamic
     return true;
   }
