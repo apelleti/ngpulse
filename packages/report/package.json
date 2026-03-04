@@ -1,0 +1,22 @@
+{
+  "name": "@ngpulse/report",
+  "version": "0.1.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@ngpulse/shared": "workspace:*",
+    "@ngpulse/info": "workspace:*",
+    "@ngpulse/debt-log": "workspace:*",
+    "@ngpulse/orphans": "workspace:*",
+    "@ngpulse/dead-css": "workspace:*",
+    "@ngpulse/circular-deps": "workspace:*",
+    "@ngpulse/hardcoded-secrets": "workspace:*",
+    "@ngpulse/compat-matrix": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
+import fs from 'node:fs';
 import { describe, it, expect } from 'vitest';
 
 const execFileAsync = promisify(execFile);
@@ -256,6 +257,26 @@ describe('ngpulse CLI E2E', () => {
     for (const f of data) {
       expect(f.value).toContain('***');
     }
+  });
+
+  it('report exits 0 and creates HTML file', async () => {
+    const reportPath = path.join(FIXTURES_DIR, 'ngpulse-report.html');
+    // Clean up any previous report
+    try { fs.unlinkSync(reportPath); } catch { /* ok */ }
+    const { stdout, exitCode } = await runCli(['report']);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain('ngpulse-report.html');
+    expect(fs.existsSync(reportPath)).toBe(true);
+    // Clean up
+    fs.unlinkSync(reportPath);
+  });
+
+  it('report --json returns consolidated data', async () => {
+    const { stdout, exitCode } = await runCli(['report', '--json']);
+    expect(exitCode).toBe(0);
+    const data = JSON.parse(stdout);
+    expect(data['info']).toBeDefined();
+    expect(data['debt-log']).toBeDefined();
   });
 
   it('info --more shows file details', async () => {

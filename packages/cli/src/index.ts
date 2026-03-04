@@ -216,4 +216,12 @@ globalOpts(
   await run(await getOptions(opts));
 }));
 
+// 21. report
+globalOpts(
+  program.command('report').alias('rep').description('Generate a full HTML health report')
+).action(wrapAction(async (opts) => {
+  const { run } = await import('@ngpulse/report');
+  await run(await getOptions(opts));
+}));
+
 program.parse();

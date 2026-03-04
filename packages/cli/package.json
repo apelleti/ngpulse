@@ -31,7 +31,8 @@
     "@ngpulse/signal-migrate": "workspace:*",
     "@ngpulse/naming-check": "workspace:*",
     "@ngpulse/style-audit": "workspace:*",
-    "@ngpulse/hardcoded-secrets": "workspace:*"
+    "@ngpulse/hardcoded-secrets": "workspace:*",
+    "@ngpulse/report": "workspace:*"
   },
   "publishConfig": {
     "access": "public"
