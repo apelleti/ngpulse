@@ -1,154 +1,178 @@
-# ngtk
+<div align="center">
 
-[![npm version](https://img.shields.io/npm/v/@ngpulse/cli.svg)](https://www.npmjs.com/package/@ngpulse/cli)
-[![CI](https://github.com/apelleti/ngtk/actions/workflows/ci.yml/badge.svg)](https://github.com/apelleti/ngtk/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-3178c6.svg)](https://www.typescriptlang.org/)
+# 🔬 ngpulse
 
-**Diagnose, analyze, and maintain Angular projects from the terminal.**
+**The Angular project health CLI**
 
-ngtk is a zero-config CLI that gives you instant visibility into any Angular codebase: dependency health, route structure, dead code, tech debt, and more — in a single command.
+[![npm](https://img.shields.io/npm/v/@ngpulse/cli?color=e63946&style=flat-square)](https://www.npmjs.com/package/@ngpulse/cli)
+[![CI](https://img.shields.io/github/actions/workflow/status/apelleti/ngtk/ci.yml?style=flat-square&label=CI)](https://github.com/apelleti/ngtk/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-457b9d?style=flat-square)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-3178c6?style=flat-square)](https://www.typescriptlang.org/)
+
+Diagnose your Angular codebase in seconds — zero config, zero friction.
 
 ```bash
-npx ngtk info
+npx @ngpulse/cli info
 ```
 
+</div>
+
+---
+
 ```
-╭────────────────────────────────────────────────────────────╮
-│                                                            │
-│   Project                                                  │
-│     Name:         demo-app                                 │
-│     Type:         application                              │
-│                                                            │
-│   Versions                                                 │
-│     Angular:      ^18.2.0                                  │
-│     TypeScript:   ~5.5.0                                   │
-│     RxJS:         ~7.8.1                                   │
-│     Node:         v22.12.0                                 │
-│     Pkg Manager:  pnpm                                     │
-│     Build Tool:   esbuild                                  │
-│                                                            │
-│   Configuration                                            │
-│     Strict Mode:  yes                                      │
-│     Zoneless:     no                                       │
-│     Material:     no                                       │
-│     NX:           no                                       │
-│                                                            │
-│   Artifact Counts                                          │
-│     Components:     16                                     │
-│     Services:        7                                     │
-│     Pipes:           1                                     │
-│     Directives:      1                                     │
-│     Guards:          2                                     │
-│     Interceptors:    1                                     │
-│     Modules:         6                                     │
-│                                                            │
-│   Health Indicators                                        │
-│     Standalone:   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 56%  (9/16)         │
-│     Signals:      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 22%  (10/45 files)  │
-│     Lazy Routes:  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 63%  (10/16 routes) │
-│                                                            │
-╰────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────╮
+│                                                         │
+│   Project                                               │
+│     Name:         my-app                                │
+│     Type:         application                           │
+│                                                         │
+│   Versions                                              │
+│     Angular:      ^18.2.0 (installed: 18.2.13)         │
+│     TypeScript:   ~5.5.0                                │
+│     Node:         v20.11.0                              │
+│     Pkg Manager:  pnpm                                  │
+│     Build Tool:   esbuild                               │
+│                                                         │
+│   Artifact Counts                                       │
+│     Components:     47                                  │
+│     Services:       18                                  │
+│     Guards:          4                                  │
+│     Modules:         6                                  │
+│                                                         │
+│   Health Indicators                                     │
+│     Standalone:   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 78%  (37/47)   │
+│     Signals:      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 61%  (29/47)   │
+│     Lazy Routes:  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 90%  (18/20)   │
+│                                                         │
+╰─────────────────────────────────────────────────────────╯
 ```
 
-## Why ngtk?
+---
 
-Joining a new Angular project usually means spending hours piecing together what's actually in the codebase. What version is it on? Which components are still module-based? Where's the tech debt hiding? Are there orphan files nobody touched in years?
+## Why ngpulse?
 
-ngtk answers all of that instantly, from the terminal, with zero configuration.
+Joining a new Angular project means spending hours piecing together the state of the codebase. What version is it on? How much of it is still NgModule-based? Where's the tech debt piling up?
 
-- **Onboarding** — understand a project in seconds, not hours
-- **Refactoring audits** — find dead CSS, orphan files, and empty boilerplate before they accumulate
-- **CI hygiene** — pipe `--json` output into `jq` to fail builds on regressions
-- **Migration tracking** — monitor standalone and signal adoption across your codebase
+**ngpulse answers all of that in one command.**
+
+> 🚀 **Onboarding** — understand a project in 30 seconds, not 3 hours  
+> 🧹 **Refactoring** — find dead CSS, orphan files, and empty boilerplate  
+> 🔒 **Security** — detect hardcoded secrets and credentials  
+> 📈 **Migration tracking** — monitor standalone and signals adoption over time  
+> 🤖 **CI-ready** — pipe `--json` output into `jq` to fail builds on regressions  
+
+---
 
 ## Installation
 
-**Zero-install** — run directly with npx:
-
 ```bash
-npx ngtk <command>
-```
+# Run without installing
+npx @ngpulse/cli <command>
 
-**Or install globally:**
-
-```bash
+# Install globally
 npm install -g @ngpulse/cli
-# or
 pnpm add -g @ngpulse/cli
 ```
 
+📦 [npmjs.com/package/@ngpulse/cli](https://www.npmjs.com/package/@ngpulse/cli)
+
+---
+
 ## Commands
 
-| Command | Alias | Description |
-|---------|-------|-------------|
-| `info` | — | Neofetch-style dashboard: versions, artifact counts, health indicators |
-| `env-compare` | `env` | Compare `environment*.ts` files and spot missing keys across envs |
-| `component-weight` | `cw` | Rank components by total file weight (TS + HTML + SCSS) |
-| `dep-map` | `deps` | Map all dependencies, categorized as Angular / ecosystem / generic |
-| `orphans` | — | Find `.ts`, `.html`, `.scss` files not referenced by any import |
-| `empty-barrel` | `eb` | Detect boilerplate: empty stylesheets, trivial specs, empty services |
-| `dead-css` | `dc` | Find unused CSS classes per component |
-| `route-tree` | `rt` | Print the full route tree as ASCII with guards and lazy markers |
-| `component-catalog` | `cc` | List all components with metadata: standalone, selectors, change detection |
-| `compat-matrix` | `compat` | Check Angular/TypeScript/RxJS/Node version compatibility |
-| `debt-log` | `debt` | Aggregate TODO/FIXME/HACK comments with git blame age and author |
+### 📊 Project Overview
+
+| Command | Description |
+|---|---|
+| `info` | Angular neofetch — versions, artifact counts, health indicators |
+| `info --more` | Same + per-file breakdown for each indicator |
+| `compat-matrix` | Check Angular / TypeScript / RxJS / Node version compatibility |
+| `dep-map` | All dependencies categorized: Angular / ecosystem / generic |
+| `env-compare` | Diff `environment*.ts` files — spot missing keys across envs |
+
+### 🔍 Code Quality
+
+| Command | Description |
+|---|---|
+| `dead-css` | Find unused CSS classes per component |
+| `orphans` | Files not referenced by any import |
+| `empty-barrel` | Empty stylesheets, trivial specs, skeleton services |
+| `circular-deps` | Detect circular imports across the codebase |
+| `input-output` | Unused `@Input()` / `@Output()` decorators |
+| `naming-check` | Enforce Angular naming conventions (selectors, suffixes, kebab-case) |
+| `style-audit` | Find `::ng-deep`, `!important`, and unscoped styles |
+
+### 🧭 Architecture
+
+| Command | Description |
+|---|---|
+| `route-tree` | Full route tree with guards, lazy markers, and component names |
+| `component-catalog` | All components — standalone, selectors, change detection strategy |
+| `component-weight` | Rank components by total file size (TS + HTML + SCSS) |
+
+### 🚀 Migration
+
+| Command | Description |
+|---|---|
+| `migration-hints` | Prioritized list of Angular modernization opportunities |
+| `signal-migrate` | Identify `@Input()` and properties ready for `signal()` migration |
+
+### 🛡 Security & Debt
+
+| Command | Description |
+|---|---|
+| `hardcoded-secrets` | Detect API keys, tokens, and credentials in source files |
+| `debt-log` | `TODO` / `FIXME` / `HACK` with git blame — age and author |
+| `i18n-check` | Text nodes missing `i18n` markers in templates |
+| `test-coverage` | Parse and display your lcov / Istanbul coverage report |
+
+---
 
 ## Global Options
 
-Every command accepts these flags:
-
 ```
 -r, --root <path>   Angular project root (default: cwd)
-    --json           Output as JSON (pipe-friendly)
--v, --verbose        Verbose output with debug info
+    --json           Machine-readable JSON output
+-m, --more           Show additional details (file paths, breakdowns)
+-v, --verbose        Debug output
 -V, --version        Print version
 ```
 
+---
+
 ## Examples
 
-**Onboarding — understand a project in 30 seconds:**
-
+**Quick codebase audit:**
 ```bash
-npx ngtk info          # versions, artifact counts, health indicators
-npx ngtk route-tree    # full route tree with guards and lazy markers
-npx ngtk compat-matrix # check Angular/TS/Node compatibility
+npx @ngpulse/cli info
+npx @ngpulse/cli route-tree
+npx @ngpulse/cli debt-log
 ```
 
-**Refactoring audit — find what to clean up:**
-
+**Security check:**
 ```bash
-npx ngtk orphans        # files not referenced anywhere
-npx ngtk dead-css       # unused CSS classes per component
-npx ngtk empty-barrel   # empty stylesheets, trivial specs, skeleton services
-npx ngtk debt-log       # TODO/FIXME/HACK sorted by age, with git blame
+npx @ngpulse/cli hardcoded-secrets
+```
+
+**Migration planning:**
+```bash
+npx @ngpulse/cli migration-hints
+npx @ngpulse/cli signal-migrate --more
 ```
 
 **CI pipeline — fail on regressions:**
-
 ```bash
-# Fail if any orphan files are introduced
-npx ngtk orphans --json | jq 'if length > 0 then halt_error(1) else empty end'
+# Fail if orphan files are introduced
+npx @ngpulse/cli orphans --json | jq 'if length > 0 then halt_error(1) else empty end'
 
-# Fail if any incompatible packages are detected
-npx ngtk compat-matrix --json | jq 'if map(select(.compatible == false)) | length > 0 then halt_error(1) else empty end'
+# Fail on incompatible versions
+npx @ngpulse/cli compat-matrix --json | jq 'if map(select(.compatible == false)) | length > 0 then halt_error(1) else empty end'
 
-# Export debt report as JSON for dashboards
-npx ngtk debt-log --json > debt-report.json
+# Export debt report
+npx @ngpulse/cli debt-log --json > debt-report.json
 ```
 
-**Before a deploy — check environment parity:**
-
-```bash
-npx ngtk env-compare --json | jq '.missing'
-```
-
-**Investigate a bloated codebase:**
-
-```bash
-npx ngtk component-weight   # heaviest components by file size
-npx ngtk dep-map            # all deps grouped by Angular / ecosystem / generic
-```
+---
 
 ## Contributing
 
@@ -158,52 +182,38 @@ cd ngtk
 pnpm install
 pnpm build
 pnpm test
+pnpm test:e2e
 ```
 
-The project is a pnpm workspace monorepo. Each command lives in its own package under `packages/`, with shared utilities in `@ngpulse/shared`.
-
-```
-packages/
-  cli/              # CLI entry point (commander)
-  shared/           # Shared utilities, types, AST helpers
-  info/             # info command
-  env-compare/      # env-compare command
-  component-weight/ # component-weight command
-  dep-map/          # dep-map command
-  orphans/          # orphans command
-  empty-barrel/     # empty-barrel command
-  dead-css/         # dead-css command
-  route-tree/       # route-tree command
-  component-catalog/# component-catalog command
-  compat-matrix/    # compat-matrix command
-  debt-log/         # debt-log command
-```
+Each command lives in its own package under `packages/`, with shared utilities in `@ngpulse/shared`. Tests use [Vitest](https://vitest.dev/).
 
 | Script | Description |
-|--------|-------------|
+|---|---|
 | `pnpm build` | Build all packages |
-| `pnpm test` | Run all tests (Vitest) |
-| `pnpm lint` | ESLint (typescript-eslint) |
-| `pnpm format` | Prettier |
-
-## License
-
-MIT
+| `pnpm test` | Unit tests (140 tests) |
+| `pnpm test:e2e` | E2E tests against real fixtures (31 tests) |
+| `pnpm lint` | ESLint |
 
 ---
 
 ## Packages
 
-All packages are published individually under the `@ngpulse` scope:
+All tools are published individually — use only what you need:
 
-| Package | npm |
+| Package | Version |
 |---|---|
-| `@ngpulse/cli` | [![npm](https://img.shields.io/npm/v/@ngpulse/cli.svg)](https://www.npmjs.com/package/@ngpulse/cli) |
-| `@ngpulse/info` | [![npm](https://img.shields.io/npm/v/@ngpulse/info.svg)](https://www.npmjs.com/package/@ngpulse/info) |
-| `@ngpulse/circular-deps` | [![npm](https://img.shields.io/npm/v/@ngpulse/circular-deps.svg)](https://www.npmjs.com/package/@ngpulse/circular-deps) |
-| `@ngpulse/dead-css` | [![npm](https://img.shields.io/npm/v/@ngpulse/dead-css.svg)](https://www.npmjs.com/package/@ngpulse/dead-css) |
-| `@ngpulse/debt-log` | [![npm](https://img.shields.io/npm/v/@ngpulse/debt-log.svg)](https://www.npmjs.com/package/@ngpulse/debt-log) |
-| `@ngpulse/orphans` | [![npm](https://img.shields.io/npm/v/@ngpulse/orphans.svg)](https://www.npmjs.com/package/@ngpulse/orphans) |
-| `@ngpulse/migration-hints` | [![npm](https://img.shields.io/npm/v/@ngpulse/migration-hints.svg)](https://www.npmjs.com/package/@ngpulse/migration-hints) |
-| `@ngpulse/hardcoded-secrets` | [![npm](https://img.shields.io/npm/v/@ngpulse/hardcoded-secrets.svg)](https://www.npmjs.com/package/@ngpulse/hardcoded-secrets) |
-| `@ngpulse/signal-migrate` | [![npm](https://img.shields.io/npm/v/@ngpulse/signal-migrate.svg)](https://www.npmjs.com/package/@ngpulse/signal-migrate) |
+| [`@ngpulse/cli`](https://www.npmjs.com/package/@ngpulse/cli) | [![npm](https://img.shields.io/npm/v/@ngpulse/cli?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/cli) |
+| [`@ngpulse/info`](https://www.npmjs.com/package/@ngpulse/info) | [![npm](https://img.shields.io/npm/v/@ngpulse/info?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/info) |
+| [`@ngpulse/dead-css`](https://www.npmjs.com/package/@ngpulse/dead-css) | [![npm](https://img.shields.io/npm/v/@ngpulse/dead-css?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/dead-css) |
+| [`@ngpulse/debt-log`](https://www.npmjs.com/package/@ngpulse/debt-log) | [![npm](https://img.shields.io/npm/v/@ngpulse/debt-log?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/debt-log) |
+| [`@ngpulse/orphans`](https://www.npmjs.com/package/@ngpulse/orphans) | [![npm](https://img.shields.io/npm/v/@ngpulse/orphans?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/orphans) |
+| [`@ngpulse/circular-deps`](https://www.npmjs.com/package/@ngpulse/circular-deps) | [![npm](https://img.shields.io/npm/v/@ngpulse/circular-deps?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/circular-deps) |
+| [`@ngpulse/migration-hints`](https://www.npmjs.com/package/@ngpulse/migration-hints) | [![npm](https://img.shields.io/npm/v/@ngpulse/migration-hints?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/migration-hints) |
+| [`@ngpulse/hardcoded-secrets`](https://www.npmjs.com/package/@ngpulse/hardcoded-secrets) | [![npm](https://img.shields.io/npm/v/@ngpulse/hardcoded-secrets?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/hardcoded-secrets) |
+| [`@ngpulse/signal-migrate`](https://www.npmjs.com/package/@ngpulse/signal-migrate) | [![npm](https://img.shields.io/npm/v/@ngpulse/signal-migrate?style=flat-square&color=e63946)](https://www.npmjs.com/package/@ngpulse/signal-migrate) |
+
+---
+
+<div align="center">
+MIT © Antoine Apelleti
+</div>
