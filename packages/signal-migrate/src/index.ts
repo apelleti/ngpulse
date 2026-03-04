@@ -1,6 +1,16 @@
 import * as path from 'node:path';
-import type { GlobalOptions } from '@ngpulse/shared';
-import { scanFiles, readFileContent, colorize, createTable, boxDraw } from '@ngpulse/shared';
+import type { GlobalOptions, ClassDeclaration } from '@ngpulse/shared';
+import {
+  scanFiles,
+  colorize,
+  createTable,
+  boxDraw,
+  createProject,
+  addSourceFiles,
+  getClasses,
+  getDecorator,
+  getPropsWithDecorator,
+} from '@ngpulse/shared';
 
 interface SignalCandidate {
   component: string;
@@ -11,27 +21,36 @@ interface SignalCandidate {
   kind: 'input' | 'property';
 }
 
-const INPUT_DECORATOR_RE =
-  /@Input\(\s*(?:\{[^}]*\}\s*|['"`]\w+['"`]\s*)?\)\s+(\w+)\s*(?::\s*([^;=]+?))?(?:\s*=\s*([^;]+))?\s*;/g;
-const SIMPLE_PROP_RE =
-  /^\s+((?:public|protected|private)\s+)?(?:readonly\s+)?(\w+)\s*(?::\s*(\w[\w<>[\], |&?]*))?\s*=\s*([^;]+);/gm;
-
-function extractInputCandidates(content: string): SignalCandidate[] {
+function extractInputCandidates(cls: ClassDeclaration): SignalCandidate[] {
   const candidates: SignalCandidate[] = [];
-  let m: RegExpExecArray | null;
 
-  INPUT_DECORATOR_RE.lastIndex = 0;
-  while ((m = INPUT_DECORATOR_RE.exec(content)) !== null) {
-    const name = m[1];
-    const type = m[2]?.trim();
-    const defaultVal = m[3]?.trim();
+  const inputProps = getPropsWithDecorator(cls, 'Input');
+  for (const prop of inputProps) {
+    const name = prop.getName();
+    const typeNode = prop.getTypeNode();
+    const type = typeNode ? typeNode.getText() : '';
+    const initializer = prop.getInitializer();
+    const defaultVal = initializer ? initializer.getText() : '';
+
+    // Check if @Input({ required: true })
+    const decorator = prop.getDecorator('Input')!;
+    const args = decorator.getArguments();
+    let isRequired = false;
+    if (args.length > 0) {
+      const argText = args[0].getText();
+      if (argText.includes('required') && argText.includes('true')) {
+        isRequired = true;
+      }
+    }
 
     let current = `@Input() ${name}`;
     if (type) current += `: ${type}`;
     if (defaultVal) current += ` = ${defaultVal}`;
 
     let suggested: string;
-    if (defaultVal) {
+    if (isRequired) {
+      suggested = type ? `${name} = input.required<${type}>()` : `${name} = input.required()`;
+    } else if (defaultVal) {
       suggested = type ? `${name} = input<${type}>(${defaultVal})` : `${name} = input(${defaultVal})`;
     } else {
       suggested = type ? `${name} = input<${type}>()` : `${name} = input()`;
@@ -50,31 +69,27 @@ function extractInputCandidates(content: string): SignalCandidate[] {
   return candidates;
 }
 
-function extractPropertyCandidates(content: string): SignalCandidate[] {
+function extractPropertyCandidates(cls: ClassDeclaration): SignalCandidate[] {
   const candidates: SignalCandidate[] = [];
+  const SKIP_CALLS = ['inject', 'input', 'output', 'signal', 'computed', 'effect', 'model'];
 
-  // Only look inside class bodies
-  const classMatch = content.match(/class\s+\w+[^{]*\{/);
-  if (!classMatch || classMatch.index === undefined) return candidates;
+  for (const prop of cls.getProperties()) {
+    // Skip properties with decorators (they're handled elsewhere)
+    if (prop.getDecorators().length > 0) continue;
 
-  const classStart = classMatch.index + classMatch[0].length;
-  const classBody = content.slice(classStart);
+    const initializer = prop.getInitializer();
+    if (!initializer) continue;
 
-  let m: RegExpExecArray | null;
-  SIMPLE_PROP_RE.lastIndex = 0;
-  while ((m = SIMPLE_PROP_RE.exec(classBody)) !== null) {
-    const visibility = m[1]?.trim() || '';
-    const name = m[2];
-    const type = m[3]?.trim();
-    const value = m[4]?.trim();
+    const name = prop.getName();
+    const value = initializer.getText().trim();
 
-    // Skip injections, decorators, complex expressions
-    if (!value) continue;
-    if (value.includes('inject(')) continue;
-    if (value.includes('input(') || value.includes('output(') || value.includes('signal(')) continue;
-    if (value.includes('computed(') || value.includes('effect(')) continue;
+    // Skip injections and existing signals
+    if (SKIP_CALLS.some(fn => value.includes(`${fn}(`))) continue;
     if (value.includes('new ')) continue;
-    if (visibility === 'private') continue;
+
+    // Skip private properties
+    const scope = prop.getScope();
+    if (scope === 'private') continue;
 
     // Only simple primitive values or arrays/objects
     const isSimple =
@@ -85,12 +100,14 @@ function extractPropertyCandidates(content: string): SignalCandidate[] {
       /^\{/.test(value);
     if (!isSimple) continue;
 
-    const prefix = visibility ? `${visibility} ` : '';
-    const current = type ? `${prefix}${name}: ${type} = ${value}` : `${prefix}${name} = ${value}`;
+    const typeNode = prop.getTypeNode();
+    const type = typeNode ? typeNode.getText() : '';
+    const visibility = scope && scope !== 'public' ? `${scope} ` : '';
 
+    const current = type ? `${visibility}${name}: ${type} = ${value}` : `${visibility}${name} = ${value}`;
     const suggested = type
-      ? `${prefix}${name} = signal<${type}>(${value})`
-      : `${prefix}${name} = signal(${value})`;
+      ? `${visibility}${name} = signal<${type}>(${value})`
+      : `${visibility}${name} = signal(${value})`;
 
     candidates.push({
       component: '',
@@ -109,20 +126,27 @@ export async function run(options: GlobalOptions): Promise<void> {
   const { root, json: jsonMode, more } = options;
 
   const tsFiles = await scanFiles(root, ['**/*.component.ts', '**/*.service.ts']);
+  const project = createProject();
+  const sourceFiles = addSourceFiles(project, tsFiles);
   const candidates: SignalCandidate[] = [];
 
-  for (const file of tsFiles) {
-    const content = await readFileContent(file);
-    const relPath = path.relative(root, file);
-    const baseName = path.basename(file).replace(/\.(component|service)\.ts$/, '');
+  for (const sf of sourceFiles) {
+    const filePath = sf.getFilePath();
+    const relPath = path.relative(root, filePath);
+    const baseName = path.basename(filePath).replace(/\.(component|service)\.ts$/, '');
 
-    const inputs = extractInputCandidates(content);
-    const props = extractPropertyCandidates(content);
+    for (const cls of getClasses(sf)) {
+      // Only process Angular classes (with @Component or @Directive or @Injectable)
+      const isAngular = getDecorator(cls, 'Component') || getDecorator(cls, 'Directive') || getDecorator(cls, 'Injectable');
 
-    for (const c of [...inputs, ...props]) {
-      c.component = baseName;
-      c.filePath = relPath;
-      candidates.push(c);
+      const inputs = isAngular ? extractInputCandidates(cls) : [];
+      const props = isAngular ? extractPropertyCandidates(cls) : [];
+
+      for (const c of [...inputs, ...props]) {
+        c.component = baseName;
+        c.filePath = relPath;
+        candidates.push(c);
+      }
     }
   }
 
