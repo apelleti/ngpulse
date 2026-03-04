@@ -1,5 +1,3 @@
-<div align="center">
-
 # 🔬 ngpulse
 
 **The Angular project health CLI**
@@ -14,8 +12,6 @@ Diagnose your Angular codebase in seconds — zero config, zero friction.
 ```bash
 npx @ngpulse/cli info
 ```
-
-</div>
 
 ---
 
