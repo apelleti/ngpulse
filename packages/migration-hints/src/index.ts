@@ -1,6 +1,19 @@
 import * as path from 'node:path';
 import type { GlobalOptions } from '@ngpulse/shared';
-import { scanFiles, readFileContent, colorize, createTable, boxDraw } from '@ngpulse/shared';
+import {
+  scanFiles,
+  readFileContent,
+  colorize,
+  createTable,
+  boxDraw,
+  createProject,
+  addSourceFiles,
+  getClasses,
+  getDecorator,
+  getDecoratorProp,
+  getPropsWithDecorator,
+  getConstructorParams,
+} from '@ngpulse/shared';
 
 interface MigrationHint {
   file: string;
@@ -24,24 +37,23 @@ export async function run(options: GlobalOptions): Promise<void> {
     (f) => !f.endsWith('.spec.ts') && !f.endsWith('.test.ts') && !f.endsWith('.d.ts'),
   );
 
+  const project = createProject();
+  const sfList = addSourceFiles(project, sourceFiles);
   const hints: MigrationHint[] = [];
 
-  for (const file of sourceFiles) {
-    const content = await readFileContent(file);
-    const relPath = path.relative(root, file);
-    const lines = content.split('\n');
+  for (const sf of sfList) {
+    const filePath = sf.getFilePath();
+    const relPath = path.relative(root, filePath);
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const lineNum = i + 1;
-
-      // HIGH: NgModule components that could be standalone
-      if (/@NgModule\s*\(/.test(line)) {
-        const blockContent = lines.slice(i, Math.min(i + 30, lines.length)).join('\n');
-        if (/declarations\s*:\s*\[/.test(blockContent)) {
+    for (const cls of getClasses(sf)) {
+      // HIGH: NgModule with declarations
+      const ngModuleDec = getDecorator(cls, 'NgModule');
+      if (ngModuleDec) {
+        const declProp = getDecoratorProp(ngModuleDec, 'declarations');
+        if (declProp && declProp !== '[]') {
           hints.push({
             file: relPath,
-            line: lineNum,
+            line: ngModuleDec.getStartLineNumber(),
             priority: 'high',
             message: 'NgModule with declarations could use standalone components',
             suggestion: 'Convert declared components to standalone and remove NgModule',
@@ -49,50 +61,66 @@ export async function run(options: GlobalOptions): Promise<void> {
         }
       }
 
-      // HIGH: HttpClientModule usage
-      if (/HttpClientModule/.test(line) && /import/.test(line)) {
-        hints.push({
-          file: relPath,
-          line: lineNum,
-          priority: 'high',
-          message: 'HttpClientModule is legacy',
-          suggestion: 'Replace with provideHttpClient() in providers',
-        });
-      }
-
-      // MEDIUM: constructor injection
-      if (/constructor\s*\(/.test(line)) {
-        const ctorBlock = lines.slice(i, Math.min(i + 10, lines.length)).join('\n');
-        const injections = ctorBlock.match(
-          /(?:private|protected|public|readonly)\s+\w+\s*:\s*\w+/g,
-        );
-        if (injections && injections.length > 0) {
+      // HIGH: HttpClientModule import (check in NgModule imports or direct import)
+      if (ngModuleDec) {
+        const importsProp = getDecoratorProp(ngModuleDec, 'imports');
+        if (importsProp && importsProp.includes('HttpClientModule')) {
           hints.push({
             file: relPath,
-            line: lineNum,
-            priority: 'medium',
-            message: `Constructor injection (${injections.length} param${injections.length > 1 ? 's' : ''})`,
-            suggestion: 'Migrate to inject() function',
+            line: ngModuleDec.getStartLineNumber(),
+            priority: 'high',
+            message: 'HttpClientModule is legacy',
+            suggestion: 'Replace with provideHttpClient() in providers',
           });
         }
       }
 
-    }
+      // Also detect HttpClientModule in file-level imports
+      for (const imp of sf.getImportDeclarations()) {
+        const namedImports = imp.getNamedImports().map(n => n.getName());
+        if (namedImports.includes('HttpClientModule')) {
+          hints.push({
+            file: relPath,
+            line: imp.getStartLineNumber(),
+            priority: 'high',
+            message: 'HttpClientModule is legacy',
+            suggestion: 'Replace with provideHttpClient() in providers',
+          });
+        }
+      }
 
-    // MEDIUM: @Input() / @Output() decorators — group per file
-    const inputCount = (content.match(/@Input\(\)/g) || []).length;
-    const outputCount = (content.match(/@Output\(\)/g) || []).length;
-    if (inputCount > 0 || outputCount > 0) {
-      const parts: string[] = [];
-      if (inputCount > 0) parts.push(`${inputCount} @Input()`);
-      if (outputCount > 0) parts.push(`${outputCount} @Output()`);
-      hints.push({
-        file: relPath,
-        line: 1,
-        priority: 'medium',
-        message: `${parts.join(' / ')} decorator${inputCount + outputCount > 1 ? 's' : ''} found`,
-        suggestion: 'Migrate to input()/output() signal functions',
+      // MEDIUM: Constructor injection
+      const params = getConstructorParams(cls);
+      const typedParams = params.filter(p => {
+        const typeNode = p.getTypeNode();
+        return typeNode && /^[A-Z]/.test(typeNode.getText());
       });
+      if (typedParams.length > 0) {
+        const ctor = cls.getConstructors()[0];
+        hints.push({
+          file: relPath,
+          line: ctor ? ctor.getStartLineNumber() : cls.getStartLineNumber(),
+          priority: 'medium',
+          message: `Constructor injection (${typedParams.length} param${typedParams.length > 1 ? 's' : ''})`,
+          suggestion: 'Migrate to inject() function',
+        });
+      }
+
+      // MEDIUM: @Input() / @Output() decorators
+      const inputProps = getPropsWithDecorator(cls, 'Input');
+      const outputProps = getPropsWithDecorator(cls, 'Output');
+      if (inputProps.length > 0 || outputProps.length > 0) {
+        const parts: string[] = [];
+        if (inputProps.length > 0) parts.push(`${inputProps.length} @Input()`);
+        if (outputProps.length > 0) parts.push(`${outputProps.length} @Output()`);
+        hints.push({
+          file: relPath,
+          line: 1,
+          priority: 'medium',
+          message: `${parts.join(' / ')} decorator${inputProps.length + outputProps.length > 1 ? 's' : ''} found`,
+          suggestion: 'Migrate to input()/output() signal functions',
+        });
+      }
     }
   }
 
