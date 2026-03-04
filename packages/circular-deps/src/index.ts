@@ -1,8 +1,13 @@
 import * as path from 'node:path';
 import type { GlobalOptions } from '@ngpulse/shared';
-import { scanFiles, readFileContent, colorize, boxDraw } from '@ngpulse/shared';
-
-const IMPORT_RE = /(?:import\s+.*?from\s+['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\))/g;
+import {
+  scanFiles,
+  readFileContent,
+  colorize,
+  boxDraw,
+  createProject,
+  addSourceFiles,
+} from '@ngpulse/shared';
 
 const TS_EXTENSIONS = new Set(['.ts', '.js', '.tsx', '.jsx', '.json']);
 
@@ -174,24 +179,38 @@ export async function run(options: GlobalOptions): Promise<void> {
   const graph = new Map<string, string[]>();
   const importLines = new Map<string, Map<string, number>>();
 
-  for (const file of tsFiles) {
-    const content = await readFileContent(file);
+  // Use ts-morph to extract imports via AST
+  const project = createProject();
+  const sourceFiles = addSourceFiles(project, tsFiles);
+
+  for (const sf of sourceFiles) {
+    const file = sf.getFilePath();
     const deps: string[] = [];
     const fileImportLines = new Map<string, number>();
-    let m: RegExpExecArray | null;
 
-    IMPORT_RE.lastIndex = 0;
-    while ((m = IMPORT_RE.exec(content)) !== null) {
-      const importPath = m[1] || m[2];
-      if (importPath) {
-        const resolved = resolveImport(file, importPath, knownFiles, root, aliases);
-        if (resolved) {
-          deps.push(resolved);
-          const lineIdx = content.slice(0, m.index).split('\n').length;
-          fileImportLines.set(resolved, lineIdx);
-        }
+    for (const imp of sf.getImportDeclarations()) {
+      const importPath = imp.getModuleSpecifierValue();
+      const resolved = resolveImport(file, importPath, knownFiles, root, aliases);
+      if (resolved) {
+        deps.push(resolved);
+        fileImportLines.set(resolved, imp.getStartLineNumber());
       }
     }
+
+    // Also handle dynamic imports: import('...')
+    sf.forEachDescendant((node) => {
+      if (node.getKind() === 213 /* CallExpression */) {
+        const text = node.getText();
+        const dynamicMatch = text.match(/^import\s*\(\s*['"]([^'"]+)['"]\s*\)/);
+        if (dynamicMatch) {
+          const resolved = resolveImport(file, dynamicMatch[1], knownFiles, root, aliases);
+          if (resolved) {
+            deps.push(resolved);
+            fileImportLines.set(resolved, node.getStartLineNumber());
+          }
+        }
+      }
+    });
 
     graph.set(file, deps);
     importLines.set(file, fileImportLines);
