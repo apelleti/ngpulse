@@ -33,15 +33,19 @@ async function captureJsonOutput(
   const raw = chunks.join('\n').trim();
   if (!raw) return null;
   // Find the last valid JSON object/array in the output (some packages may print warnings first)
-  const jsonStart = raw.lastIndexOf('{') !== -1 || raw.lastIndexOf('[') !== -1
-    ? Math.max(raw.lastIndexOf('{'), raw.lastIndexOf('['))
-    : -1;
-  const candidate = jsonStart >= 0 ? raw.slice(raw.indexOf(raw[jsonStart])) : raw;
+  // Find the first '{' or '[' — JSON always starts there even if there's preamble
+  const firstBrace = raw.indexOf('{');
+  const firstBracket = raw.indexOf('[');
+  let jsonStart = -1;
+  if (firstBrace >= 0 && firstBracket >= 0) jsonStart = Math.min(firstBrace, firstBracket);
+  else if (firstBrace >= 0) jsonStart = firstBrace;
+  else if (firstBracket >= 0) jsonStart = firstBracket;
+
+  const candidate = jsonStart >= 0 ? raw.slice(jsonStart) : raw;
   try {
     return JSON.parse(candidate);
   } catch {
-    // Try the full raw output as last resort
-    try { return JSON.parse(raw); } catch { return null; }
+    return null;
   }
 }
 

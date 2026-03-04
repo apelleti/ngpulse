@@ -21,6 +21,7 @@ import {
   getDecoratorProp,
   importsFrom,
   getConstructorParams,
+  SyntaxKind,
 } from '@ngpulse/shared';
 
 interface InfoData {
@@ -290,20 +291,46 @@ async function countSignalUsage(root: string, project: Project): Promise<{ files
   return { filesWithSignals, totalComponentsAndServices: scanned.length, files: signalFiles, allFiles: scanned.map(f => path.relative(root, f)) };
 }
 
-async function countLazyRoutes(root: string): Promise<{ lazy: number; totalRoutes: number; files: string[]; allFiles: string[] }> {
+async function countLazyRoutes(root: string, project: Project): Promise<{ lazy: number; totalRoutes: number; files: string[]; allFiles: string[] }> {
   const routeFiles = await scanFiles(root, [
     '**/*routing*.ts', '**/*routes*.ts', '**/*.routes.ts', '**/app.config.ts',
   ]);
   let lazy = 0, total = 0;
   const lazyFiles: string[] = [];
-  for (const f of routeFiles) {
+  const sourceFiles = addSourceFiles(project, routeFiles);
+
+  for (let i = 0; i < routeFiles.length; i++) {
+    const f = routeFiles[i];
+    const sf = sourceFiles[i];
+    if (!sf) continue;
     try {
-      const c = await readFileContent(f);
-      total += (c.match(/path\s*:/g) || []).length;
-      const fileLazy = (c.match(/loadComponent\s*:/g) || []).length + (c.match(/loadChildren\s*:/g) || []).length;
+      // Count route definitions via AST: look for object literals with a 'path' property
+      // This avoids counting 'path:' inside strings, comments, or unrelated objects
+      let fileTotal = 0;
+      let fileLazy = 0;
+      sf.forEachDescendant((node) => {
+        const obj = node.asKind(SyntaxKind.ObjectLiteralExpression);
+        if (!obj) return;
+        const hasPath = obj.getProperty('path') !== undefined;
+        if (!hasPath) return;
+        fileTotal++;
+        if (obj.getProperty('loadComponent') || obj.getProperty('loadChildren')) {
+          fileLazy++;
+        }
+      });
+      total += fileTotal;
       if (fileLazy > 0) lazyFiles.push(path.relative(root, f));
       lazy += fileLazy;
-    } catch { /* skip */ }
+    } catch {
+      // Fallback to regex for unparseable files
+      try {
+        const c = await readFileContent(f);
+        total += (c.match(/path\s*:/g) || []).length;
+        const fl = (c.match(/loadComponent\s*:/g) || []).length + (c.match(/loadChildren\s*:/g) || []).length;
+        if (fl > 0) lazyFiles.push(path.relative(root, f));
+        lazy += fl;
+      } catch { /* skip */ }
+    }
   }
   return { lazy: Math.min(lazy, total), totalRoutes: total, files: lazyFiles, allFiles: routeFiles.map(f => path.relative(root, f)) };
 }
@@ -344,7 +371,7 @@ async function gatherInfoData(options: GlobalOptions): Promise<InfoData> {
 
   const [signalUsage, lazyRoutes] = await Promise.all([
     countSignalUsage(options.root, project),
-    countLazyRoutes(options.root),
+    countLazyRoutes(options.root, project),
   ]);
 
   let linesOfCode: InfoData['linesOfCode'];
