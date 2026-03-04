@@ -601,9 +601,9 @@
       { text: '│    ', cls: 'c-muted' }, { text: 'Modules:', cls: 'c-yellow' }, { text: '       12                            │\n', cls: 'c-muted' },
       { text: '│                                                 │\n', cls: 'c-muted' },
       { text: '│  ', cls: 'c-muted' }, { text: 'Health Indicators', cls: 'c-cyan' }, { text: '                              │\n', cls: 'c-muted' },
-      { text: '│    ', cls: 'c-muted' }, { text: 'Standalone:', cls: 'c-magenta' }, { text: '   ', cls: 'c-muted' }, { text: '████████', cls: 'c-green' }, { text: '░░', cls: 'c-muted' }, { text: '  81%              │\n', cls: 'c-muted' },
-      { text: '│    ', cls: 'c-muted' }, { text: 'Signals:', cls: 'c-magenta' }, { text: '      ', cls: 'c-muted' }, { text: '██████', cls: 'c-green' }, { text: '░░░░', cls: 'c-muted' }, { text: '  30%              │\n', cls: 'c-muted' },
-      { text: '│    ', cls: 'c-muted' }, { text: 'Lazy Routes:', cls: 'c-magenta' }, { text: '  ', cls: 'c-muted' }, { text: '█████████', cls: 'c-green' }, { text: '░', cls: 'c-muted' }, { text: '  86%              │\n', cls: 'c-muted' },
+      { text: '│    ', cls: 'c-muted' }, { text: 'Standalone:', cls: 'c-magenta' }, { text: '   [========--]  81%              │\n', cls: 'c-muted' },
+      { text: '│    ', cls: 'c-muted' }, { text: 'Signals:', cls: 'c-magenta' }, { text: '      [======----]  30%              │\n', cls: 'c-muted' },
+      { text: '│    ', cls: 'c-muted' }, { text: 'Lazy Routes:', cls: 'c-magenta' }, { text: '  [=========.]  86%              │\n', cls: 'c-muted' },
       { text: '╰─────────────────────────────────────────────────╯\n', cls: 'c-muted' },
     ];
 
@@ -653,9 +653,9 @@
 │    </span><span class="c-yellow">Modules:</span><span class="c-muted">       12                            │
 │                                                 │
 │  </span><span class="c-cyan">Health Indicators</span><span class="c-muted">                              │
-│    </span><span class="c-magenta">Standalone:</span><span class="c-muted">   </span><span class="c-green">████████</span><span class="c-muted">░░  81%              │
-│    </span><span class="c-magenta">Signals:</span><span class="c-muted">      </span><span class="c-green">██████</span><span class="c-muted">░░░░  30%              │
-│    </span><span class="c-magenta">Lazy Routes:</span><span class="c-muted">  </span><span class="c-green">█████████</span><span class="c-muted">░  86%              │
+│    </span><span class="c-magenta">Standalone:</span><span class="c-muted">   <span style="display:inline-block;background:var(--accent);width:8ch;height:0.75em;vertical-align:middle;border-radius:1px"></span><span style="display:inline-block;background:#30363d;width:2ch;height:0.75em;vertical-align:middle;border-radius:1px"></span>  81%              │
+│    </span><span class="c-magenta">Signals:</span><span class="c-muted">      <span style="display:inline-block;background:var(--accent);width:6ch;height:0.75em;vertical-align:middle;border-radius:1px"></span><span style="display:inline-block;background:#30363d;width:4ch;height:0.75em;vertical-align:middle;border-radius:1px"></span>  30%              │
+│    </span><span class="c-magenta">Lazy Routes:</span><span class="c-muted">  <span style="display:inline-block;background:var(--accent);width:9ch;height:0.75em;vertical-align:middle;border-radius:1px"></span><span style="display:inline-block;background:#30363d;width:1ch;height:0.75em;vertical-align:middle;border-radius:1px"></span>  86%              │
 ╰─────────────────────────────────────────────────╯</span>`,
 
       'route-tree': `<span class="c-green">$ npx ngtk route-tree</span>
@@ -784,7 +784,7 @@ UserFormComponent         app-user-form             <span class="c-green">✓</s
 UserListComponent         app-user-list             <span class="c-red">✗</span>           src/users/user-list/user-list.component.ts
 
 47 components: <span class="c-green">38</span> standalone, <span class="c-yellow">9</span> module-based
-Standalone ratio: <span class="c-green">████████</span><span class="c-muted">░░</span> 81%`,
+Standalone ratio: <span style="display:inline-block;background:var(--accent);width:8ch;height:0.75em;vertical-align:middle;border-radius:1px"></span><span style="display:inline-block;background:#30363d;width:2ch;height:0.75em;vertical-align:middle;border-radius:1px"></span> 81%`,
 
       'compat-matrix': `<span class="c-green">$ npx ngtk compat-matrix</span>
 
