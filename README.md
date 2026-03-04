@@ -7,13 +7,13 @@
 
 **Diagnose, analyze, and maintain Angular projects from the terminal.**
 
-ngtk is a zero-config CLI that gives you instant visibility into an Angular codebase: dependency health, route structure, dead code, tech debt, and more — in a single command.
+ngtk is a zero-config CLI that gives you instant visibility into any Angular codebase: dependency health, route structure, dead code, tech debt, and more — in a single command.
 
-## Demo
+```bash
+npx ngtk info
+```
 
 ```
-$ npx ngtk info
-
 ╭─────────────────────────────────────────────────╮
 │  ngtk — Angular Project Info                    │
 │                                                 │
@@ -40,6 +40,17 @@ $ npx ngtk info
 ╰─────────────────────────────────────────────────╯
 ```
 
+## Why ngtk?
+
+Joining a new Angular project usually means spending hours piecing together what's actually in the codebase. What version is it on? Which components are still module-based? Where's the tech debt hiding? Are there orphan files nobody touched in years?
+
+ngtk answers all of that instantly, from the terminal, with zero configuration.
+
+- **Onboarding** — understand a project in seconds, not hours
+- **Refactoring audits** — find dead CSS, orphan files, and empty boilerplate before they accumulate
+- **CI hygiene** — pipe `--json` output into `jq` to fail builds on regressions
+- **Migration tracking** — monitor standalone and signal adoption across your codebase
+
 ## Installation
 
 **Zero-install** — run directly with npx:
@@ -60,14 +71,14 @@ pnpm add -g @ngtk/cli
 
 | Command | Alias | Description |
 |---------|-------|-------------|
-| `info` | — | Neofetch-style project dashboard: versions, artifact counts, health indicators |
+| `info` | — | Neofetch-style dashboard: versions, artifact counts, health indicators |
 | `env-compare` | `env` | Compare `environment*.ts` files and spot missing keys across envs |
 | `component-weight` | `cw` | Rank components by total file weight (TS + HTML + SCSS) |
 | `dep-map` | `deps` | Map all dependencies, categorized as Angular / ecosystem / generic |
 | `orphans` | — | Find `.ts`, `.html`, `.scss` files not referenced by any import |
 | `empty-barrel` | `eb` | Detect boilerplate: empty stylesheets, trivial specs, empty services |
 | `dead-css` | `dc` | Find unused CSS classes per component |
-| `route-tree` | `rt` | Print the full route tree as an ASCII tree with guards and lazy markers |
+| `route-tree` | `rt` | Print the full route tree as ASCII with guards and lazy markers |
 | `component-catalog` | `cc` | List all components with metadata: standalone, selectors, change detection |
 | `compat-matrix` | `compat` | Check Angular/TypeScript/RxJS/Node version compatibility |
 | `debt-log` | `debt` | Aggregate TODO/FIXME/HACK comments with git blame age and author |
@@ -85,32 +96,47 @@ Every command accepts these flags:
 
 ## Examples
 
-**CI pipeline — fail on dead code:**
+**Onboarding — understand a project in 30 seconds:**
 
 ```bash
+npx ngtk info          # versions, artifact counts, health indicators
+npx ngtk route-tree    # full route tree with guards and lazy markers
+npx ngtk compat-matrix # check Angular/TS/Node compatibility
+```
+
+**Refactoring audit — find what to clean up:**
+
+```bash
+npx ngtk orphans        # files not referenced anywhere
+npx ngtk dead-css       # unused CSS classes per component
+npx ngtk empty-barrel   # empty stylesheets, trivial specs, skeleton services
+npx ngtk debt-log       # TODO/FIXME/HACK sorted by age, with git blame
+```
+
+**CI pipeline — fail on regressions:**
+
+```bash
+# Fail if any orphan files are introduced
 npx ngtk orphans --json | jq 'if length > 0 then halt_error(1) else empty end'
+
+# Fail if any incompatible packages are detected
+npx ngtk compat-matrix --json | jq 'if map(select(.compatible == false)) | length > 0 then halt_error(1) else empty end'
+
+# Export debt report as JSON for dashboards
+npx ngtk debt-log --json > debt-report.json
 ```
 
-**Onboarding — get a project overview in seconds:**
-
-```bash
-npx ngtk info
-npx ngtk route-tree
-npx ngtk compat-matrix
-```
-
-**Refactoring audit — find cleanup targets:**
-
-```bash
-npx ngtk dead-css
-npx ngtk empty-barrel
-npx ngtk debt-log
-```
-
-**Compare environment files before a deploy:**
+**Before a deploy — check environment parity:**
 
 ```bash
 npx ngtk env-compare --json | jq '.missing'
+```
+
+**Investigate a bloated codebase:**
+
+```bash
+npx ngtk component-weight   # heaviest components by file size
+npx ngtk dep-map            # all deps grouped by Angular / ecosystem / generic
 ```
 
 ## Contributing
@@ -123,7 +149,7 @@ pnpm build
 pnpm test
 ```
 
-The project is a pnpm workspace monorepo with 14 packages under `packages/`. Each command is its own package (`@ngtk/<command>`) with shared utilities in `@ngtk/shared`.
+The project is a pnpm workspace monorepo. Each command lives in its own package under `packages/`, with shared utilities in `@ngtk/shared`.
 
 ```
 packages/
@@ -141,8 +167,6 @@ packages/
   compat-matrix/    # compat-matrix command
   debt-log/         # debt-log command
 ```
-
-**Scripts:**
 
 | Script | Description |
 |--------|-------------|

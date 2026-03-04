@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ngtk — Angular Toolkit CLI</title>
-  <meta name="description" content="Diagnose, analyze, and maintain Angular projects from the terminal.">
+  <meta name="description" content="Diagnose, analyze, and maintain Angular projects from the terminal. Zero config, 11 commands.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -33,7 +33,6 @@
       overflow-x: hidden;
     }
 
-    /* Fade-in on scroll */
     .fade-in {
       opacity: 0;
       transform: translateY(24px);
@@ -51,122 +50,166 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 4rem 2rem;
       text-align: center;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
     }
 
     .hero h1 {
-      font-size: clamp(3rem, 8vw, 5rem);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
       font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
     }
 
-    .hero h1 span {
-      color: var(--accent);
-    }
+    .hero h1 span { color: var(--accent); }
 
-    .hero .tagline {
-      font-size: clamp(1rem, 2.5vw, 1.35rem);
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
       color: var(--text-muted);
-      max-width: 540px;
-      margin-bottom: 2rem;
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
     }
 
     .hero-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .btn-primary {
       background: var(--accent);
-      color: var(--bg);
+      color: #0d1117;
       font-weight: 700;
-      font-size: 1rem;
-      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+      padding: 0.7rem 1.6rem;
       border-radius: 8px;
-      border: none;
-      cursor: pointer;
       text-decoration: none;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      margin-bottom: 3rem;
+      transition: opacity 0.2s;
     }
-    .hero-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 24px rgba(0, 255, 136, 0.3);
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.7rem 1.6rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: border-color 0.2s;
     }
+    .btn-secondary:hover { border-color: var(--text-muted); }
 
     .hero-terminal {
-      width: 100%;
-      max-width: 640px;
-      background: var(--bg-terminal);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      text-align: left;
-    }
-
-    .terminal-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 14px;
       background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 560px;
+      text-align: left;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      white-space: pre;
+      overflow: hidden;
+      position: relative;
     }
 
-    .terminal-dot {
-      width: 12px;
-      height: 12px;
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
+    .terminal-dots span {
+      width: 12px; height: 12px;
       border-radius: 50%;
     }
-    .terminal-dot.red { background: #ff5f57; }
-    .terminal-dot.yellow { background: #febc2e; }
-    .terminal-dot.green { background: #28c840; }
+    .terminal-dots .d-red { background: #ff5f57; }
+    .terminal-dots .d-yellow { background: #febc2e; }
+    .terminal-dots .d-green { background: #28c840; }
 
-    .terminal-body {
-      padding: 1rem 1.25rem;
-      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
-      font-size: 0.82rem;
-      line-height: 1.55;
-      white-space: pre;
-      overflow-x: auto;
-      min-height: 340px;
-    }
-
-    .terminal-body .prompt {
-      color: var(--accent);
-    }
-    .terminal-body .cmd {
-      color: var(--text);
-    }
-    .terminal-body .c-cyan { color: var(--cyan); }
-    .terminal-body .c-green { color: var(--accent); }
-    .terminal-body .c-yellow { color: var(--yellow); }
-    .terminal-body .c-magenta { color: var(--magenta); }
-    .terminal-body .c-muted { color: var(--text-muted); }
-    .terminal-body .c-red { color: var(--red); }
-    .terminal-body .c-white { color: var(--text); }
-
-    /* ===== SECTION COMMON ===== */
+    /* ===== SHARED SECTION STYLES ===== */
     section {
-      padding: 5rem 2rem;
       max-width: 1100px;
       margin: 0 auto;
+      padding: 5rem 2rem;
     }
 
     section h2 {
-      font-size: 2rem;
-      font-weight: 700;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800;
       text-align: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
-    section .section-sub {
+    .section-sub {
       text-align: center;
       color: var(--text-muted);
       margin-bottom: 3rem;
+      font-size: 1.05rem;
     }
 
-    /* ===== FEATURES GRID ===== */
+    /* ===== WHY SECTION ===== */
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .why-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .why-card .why-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .why-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: var(--accent);
+    }
+
+    .why-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ===== FEATURES ===== */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -176,149 +219,152 @@
     .feature-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      transition: border-color 0.2s ease, transform 0.2s ease;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.2s;
     }
-    .feature-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .feature-icon {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
+    .feature-card:hover { border-color: var(--accent); }
 
     .feature-card h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
     }
-
     .feature-card h3 code {
-      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: var(--accent-dim);
       color: var(--accent);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
       font-size: 0.9rem;
     }
-
     .feature-card p {
       font-size: 0.875rem;
       color: var(--text-muted);
-      line-height: 1.5;
     }
 
-    /* ===== DEMO TABS ===== */
+    /* ===== DEMO ===== */
     .demo-tabs {
       display: flex;
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 0;
-      overflow-x: auto;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: center;
     }
 
     .demo-tab {
-      padding: 0.6rem 1.2rem;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       color: var(--text-muted);
-      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-family: 'Menlo', 'Consolas', monospace;
       font-size: 0.8rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
       cursor: pointer;
-      white-space: nowrap;
-      transition: color 0.15s ease, border-color 0.15s ease;
+      transition: all 0.15s;
     }
-    .demo-tab:hover { color: var(--text); }
-    .demo-tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
+    .demo-tab:hover { border-color: var(--text-muted); color: var(--text); }
+    .demo-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
     .demo-terminal {
-      background: var(--bg-terminal);
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      max-width: 720px;
-      margin: 0 auto;
-    }
-
-    .demo-content {
-      padding: 1rem 1.25rem;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 0.8rem;
-      line-height: 1.55;
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.75;
       white-space: pre;
       overflow-x: auto;
-      min-height: 260px;
     }
 
-    .demo-pane { display: none; }
-    .demo-pane.active { display: block; }
+    /* ===== CI SECTION ===== */
+    .ci-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .ci-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .ci-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .ci-card pre {
+      background: var(--bg-terminal);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      font-size: 0.78rem;
+      line-height: 1.65;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--text-muted);
+    }
+
+    .ci-card pre .hl { color: var(--text); }
 
     /* ===== INSTALL ===== */
     .install-options {
+      max-width: 560px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      max-width: 520px;
-      margin: 0 auto;
+      gap: 0.75rem;
     }
 
     .install-row {
       display: flex;
       align-items: center;
+      gap: 0.75rem;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
     }
 
     .install-label {
-      background: var(--bg-terminal);
-      padding: 0.75rem 1rem;
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      border-right: 1px solid var(--border);
-      min-width: 60px;
-      text-align: center;
+      width: 44px;
+      flex-shrink: 0;
     }
 
     .install-cmd {
-      flex: 1;
-      padding: 0.75rem 1rem;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 0.85rem;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 0.88rem;
       color: var(--accent);
+      flex: 1;
     }
 
     .install-copy {
       background: none;
       border: none;
-      color: var(--text-muted);
-      padding: 0.75rem 1rem;
       cursor: pointer;
       font-size: 1rem;
-      transition: color 0.15s ease;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      transition: background 0.15s;
     }
-    .install-copy:hover { color: var(--accent); }
+    .install-copy:hover { background: var(--border); }
 
     /* ===== FOOTER ===== */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem;
       text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.875rem;
     }
-
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    footer a:hover { text-decoration: underline; }
 
     .footer-links {
       display: flex;
@@ -327,30 +373,71 @@
       margin-bottom: 0.75rem;
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 640px) {
-      .hero-terminal { border-radius: 0; border-left: none; border-right: none; }
-      .terminal-body { font-size: 0.7rem; padding: 0.75rem; }
-      .features-grid { grid-template-columns: 1fr; }
-      .demo-content { font-size: 0.7rem; }
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
     }
+    footer a:hover { color: var(--accent); }
+
+    /* Terminal colors */
+    .c-green { color: var(--accent); }
+    .c-cyan { color: var(--cyan); }
+    .c-yellow { color: var(--yellow); }
+    .c-red { color: var(--red); }
+    .c-magenta { color: var(--magenta); }
+    .c-muted { color: var(--text-muted); }
+    .c-white { color: var(--text); }
+    .prompt { color: var(--accent); }
   </style>
 </head>
 <body>
 
   <!-- ===== HERO ===== -->
   <section class="hero">
-    <h1><span>ngtk</span></h1>
-    <p class="tagline">Diagnose, analyze, and maintain Angular projects from the terminal.</p>
-    <a class="hero-cta" href="#install">npx ngtk info</a>
-
+    <div class="hero-badge">Zero config · 11 commands · TypeScript</div>
+    <h1>Angular projects,<br><span>understood instantly.</span></h1>
+    <p class="hero-sub">
+      ngtk is a terminal CLI that gives you immediate visibility into any Angular codebase —
+      dependency health, route structure, dead code, tech debt, and more.
+    </p>
+    <div class="hero-cta">
+      <a class="btn-primary" href="#install">Get Started</a>
+      <a class="btn-secondary" href="https://github.com/AntoinePouworkaround/ngtk">GitHub →</a>
+    </div>
     <div class="hero-terminal">
-      <div class="terminal-bar">
-        <div class="terminal-dot red"></div>
-        <div class="terminal-dot yellow"></div>
-        <div class="terminal-dot green"></div>
+      <div class="terminal-dots">
+        <span class="d-red"></span><span class="d-yellow"></span><span class="d-green"></span>
       </div>
-      <div class="terminal-body" id="hero-term"></div>
+      <div id="hero-term"></div>
+    </div>
+  </section>
+
+  <!-- ===== WHY ===== -->
+  <section class="fade-in" id="why">
+    <h2>Built for real Angular teams.</h2>
+    <p class="section-sub">The questions you ask every time you open a new project — answered in one command.</p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">🚀</div>
+        <h3>Onboarding</h3>
+        <p>New to a project? Get versions, component counts, route structure, and health indicators in under 5 seconds.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🔍</div>
+        <h3>Refactoring audits</h3>
+        <p>Surface orphan files, dead CSS, empty boilerplate, and tech debt before they accumulate and slow your team down.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🔁</div>
+        <h3>CI integration</h3>
+        <p>Every command supports <code style="color:var(--accent)">--json</code> output. Pipe into <code style="color:var(--accent)">jq</code>, fail builds on regressions, export reports to dashboards.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📈</div>
+        <h3>Migration tracking</h3>
+        <p>Monitor standalone adoption, signal usage, and lazy route coverage as you modernize from Angular 14 to 18+.</p>
+      </div>
     </div>
   </section>
 
@@ -358,62 +445,50 @@
   <section class="fade-in" id="features">
     <h2>11 Commands. Zero Config.</h2>
     <p class="section-sub">Everything you need to understand an Angular codebase at a glance.</p>
-
     <div class="features-grid">
       <div class="feature-card">
-        <div class="feature-icon">&#x1F4CA;</div>
         <h3><code>info</code></h3>
-        <p>Neofetch-style project dashboard with versions, artifact counts, and health indicators.</p>
+        <p>Neofetch-style dashboard: versions, artifact counts, standalone/signal/lazy-route health indicators.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x1F500;</div>
         <h3><code>env-compare</code></h3>
-        <p>Compare environment files side-by-side and spot missing keys across envs.</p>
+        <p>Compare all <code>environment*.ts</code> files side-by-side and instantly spot missing keys.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x2696;&#xFE0F;</div>
         <h3><code>component-weight</code></h3>
-        <p>Rank components by total file weight — TS + HTML + SCSS combined.</p>
+        <p>Rank every component by total file size (TS + HTML + SCSS) to find the heaviest ones first.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x1F5FA;&#xFE0F;</div>
         <h3><code>dep-map</code></h3>
-        <p>Map all dependencies categorized as Angular, ecosystem, or generic.</p>
+        <p>Map all dependencies categorized as Angular core, ecosystem, or generic third-party.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x1F47B;</div>
         <h3><code>orphans</code></h3>
-        <p>Find .ts, .html, .scss files not referenced by any import statement.</p>
+        <p>Find <code>.ts</code>, <code>.html</code>, and <code>.scss</code> files that nothing imports — safe to delete.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x1F5D1;&#xFE0F;</div>
         <h3><code>empty-barrel</code></h3>
-        <p>Detect boilerplate: empty stylesheets, trivial specs, empty services.</p>
+        <p>Detect boilerplate clutter: empty stylesheets, trivial specs, and skeleton services with no methods.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x2702;&#xFE0F;</div>
         <h3><code>dead-css</code></h3>
-        <p>Find unused CSS classes in each component's stylesheet.</p>
+        <p>Find CSS classes declared in component stylesheets that are never referenced in the template.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x1F333;</div>
         <h3><code>route-tree</code></h3>
-        <p>Print the full route tree as ASCII art with guards and lazy markers.</p>
+        <p>Print the full route tree as ASCII art, annotated with guards and lazy-loaded markers.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x1F4D6;</div>
         <h3><code>component-catalog</code></h3>
-        <p>List all components with selectors, standalone status, and change detection.</p>
+        <p>List every component with its selector, standalone status, and file path in a sortable table.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x2705;</div>
         <h3><code>compat-matrix</code></h3>
-        <p>Check Angular / TypeScript / RxJS / Node version compatibility.</p>
+        <p>Cross-check your Angular, TypeScript, RxJS, and Node versions against the official compatibility matrix.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">&#x1F4DD;</div>
         <h3><code>debt-log</code></h3>
-        <p>Aggregate TODO/FIXME/HACK comments with git blame age and author.</p>
+        <p>Aggregate all TODO/FIXME/HACK comments enriched with git blame age and author — sorted oldest first.</p>
       </div>
     </div>
   </section>
@@ -421,16 +496,48 @@
   <!-- ===== DEMO ===== -->
   <section class="fade-in" id="demo">
     <h2>See It In Action</h2>
-    <p class="section-sub">Switch between commands to preview their output.</p>
+    <p class="section-sub">All 11 commands, real output.</p>
+    <div class="demo-tabs" id="demo-tabs"></div>
+    <div class="demo-terminal" id="demo-content"></div>
+  </section>
 
-    <div class="demo-terminal">
-      <div class="terminal-bar">
-        <div class="terminal-dot red"></div>
-        <div class="terminal-dot yellow"></div>
-        <div class="terminal-dot green"></div>
+  <!-- ===== CI ===== -->
+  <section class="fade-in" id="ci">
+    <h2>Made for CI pipelines.</h2>
+    <p class="section-sub">Every command supports <code style="color:var(--accent)">--json</code>. Pipe, filter, fail, report.</p>
+    <div class="ci-grid">
+      <div class="ci-card">
+        <h3>🚫 Fail on orphan files</h3>
+        <pre><span class="hl">npx ngtk orphans --json</span> \
+  | jq 'if length > 0
+        then halt_error(1)
+        else empty end'</pre>
       </div>
-      <div class="demo-tabs" id="demo-tabs"></div>
-      <div class="demo-content" id="demo-content"></div>
+      <div class="ci-card">
+        <h3>⚠️ Fail on incompatible packages</h3>
+        <pre><span class="hl">npx ngtk compat-matrix --json</span> \
+  | jq 'if map(select(
+          .compatible == false
+        )) | length > 0
+        then halt_error(1)
+        else empty end'</pre>
+      </div>
+      <div class="ci-card">
+        <h3>📊 Export debt report</h3>
+        <pre><span class="hl">npx ngtk debt-log --json</span> \
+  > debt-report.json
+
+# Upload to your dashboard,
+# Slack webhook, or S3</pre>
+      </div>
+      <div class="ci-card">
+        <h3>🔑 Check env parity before deploy</h3>
+        <pre><span class="hl">npx ngtk env-compare --json</span> \
+  | jq '.missing
+        | if length > 0
+          then halt_error(1)
+          else empty end'</pre>
+      </div>
     </div>
   </section>
 
@@ -464,7 +571,7 @@
       <a href="https://github.com/AntoinePouworkaround/ngtk">GitHub</a>
       <a href="https://www.npmjs.com/package/@ngtk/cli">npm</a>
     </div>
-    <p>MIT License</p>
+    <p>MIT License &mdash; Built for Angular developers</p>
   </footer>
 
   <script>
@@ -485,6 +592,9 @@
       { text: '│  ', cls: 'c-muted' }, { text: 'Artifact Counts', cls: 'c-cyan' }, { text: '                                │\n', cls: 'c-muted' },
       { text: '│    ', cls: 'c-muted' }, { text: 'Components:', cls: 'c-yellow' }, { text: '    47                            │\n', cls: 'c-muted' },
       { text: '│    ', cls: 'c-muted' }, { text: 'Services:', cls: 'c-yellow' }, { text: '      22                            │\n', cls: 'c-muted' },
+      { text: '│    ', cls: 'c-muted' }, { text: 'Pipes:', cls: 'c-yellow' }, { text: '          5                            │\n', cls: 'c-muted' },
+      { text: '│    ', cls: 'c-muted' }, { text: 'Directives:', cls: 'c-yellow' }, { text: '    8                            │\n', cls: 'c-muted' },
+      { text: '│    ', cls: 'c-muted' }, { text: 'Guards:', cls: 'c-yellow' }, { text: '         3                            │\n', cls: 'c-muted' },
       { text: '│    ', cls: 'c-muted' }, { text: 'Modules:', cls: 'c-yellow' }, { text: '       12                            │\n', cls: 'c-muted' },
       { text: '│                                                 │\n', cls: 'c-muted' },
       { text: '│  ', cls: 'c-muted' }, { text: 'Health Indicators', cls: 'c-cyan' }, { text: '                              │\n', cls: 'c-muted' },
@@ -497,9 +607,7 @@
     function typeHero() {
       const el = document.getElementById('hero-term');
       el.innerHTML = '';
-      let segIdx = 0;
-      let charIdx = 0;
-      let currentSpan = null;
+      let segIdx = 0, charIdx = 0, currentSpan = null;
 
       function tick() {
         if (segIdx >= heroLines.length) return;
@@ -511,22 +619,42 @@
         }
         currentSpan.textContent += seg.text[charIdx];
         charIdx++;
-        if (charIdx >= seg.text.length) {
-          segIdx++;
-          charIdx = 0;
-          currentSpan = null;
-        }
+        if (charIdx >= seg.text.length) { segIdx++; charIdx = 0; currentSpan = null; }
         const delay = segIdx <= 1 ? 20 : 2;
         requestAnimationFrame(() => setTimeout(tick, delay));
       }
-
       setTimeout(tick, 400);
     }
-
     typeHero();
 
     // ===== DEMO TABS =====
     const demos = {
+      'info': `<span class="c-green">$ npx ngtk info</span>
+
+<span class="c-muted">╭─────────────────────────────────────────────────╮
+│  </span><span class="c-cyan">ngtk — Angular Project Info</span><span class="c-muted">                    │
+│                                                 │
+│  </span><span class="c-cyan">Versions</span><span class="c-muted">                                       │
+│    </span><span class="c-green">Angular:</span><span class="c-muted">      ^18.2.0                        │
+│    </span><span class="c-green">TypeScript:</span><span class="c-muted">   ~5.4.5                         │
+│    </span><span class="c-green">RxJS:</span><span class="c-muted">         ~7.8.1                         │
+│    </span><span class="c-green">Node:</span><span class="c-muted">         v20.11.0                       │
+│    </span><span class="c-green">Pkg Manager:</span><span class="c-muted">  pnpm                           │
+│                                                 │
+│  </span><span class="c-cyan">Artifact Counts</span><span class="c-muted">                                │
+│    </span><span class="c-yellow">Components:</span><span class="c-muted">    47                            │
+│    </span><span class="c-yellow">Services:</span><span class="c-muted">      22                            │
+│    </span><span class="c-yellow">Pipes:</span><span class="c-muted">          5                            │
+│    </span><span class="c-yellow">Directives:</span><span class="c-muted">    8                            │
+│    </span><span class="c-yellow">Guards:</span><span class="c-muted">         3                            │
+│    </span><span class="c-yellow">Modules:</span><span class="c-muted">       12                            │
+│                                                 │
+│  </span><span class="c-cyan">Health Indicators</span><span class="c-muted">                              │
+│    </span><span class="c-magenta">Standalone:</span><span class="c-muted">   ████████░░  81%              │
+│    </span><span class="c-magenta">Signals:</span><span class="c-muted">      ██████░░░░  30%              │
+│    </span><span class="c-magenta">Lazy Routes:</span><span class="c-muted">  █████████░  86%              │
+╰─────────────────────────────────────────────────╯</span>`,
+
       'route-tree': `<span class="c-green">$ npx ngtk route-tree</span>
 
 <span class="c-white">/</span> (<span class="c-cyan">AppComponent</span>)
@@ -546,40 +674,116 @@
 <span class="c-cyan">Environment File Comparison</span>
 
 Key           environment.ts  environment.prod.ts  environment.staging.ts
-───────────── ─────────────── ──────────────────── ─────────────────────
-apiUrl        <span class="c-green">&#x2713;</span>               <span class="c-green">&#x2713;</span>                    <span class="c-green">&#x2713;</span>
-production    <span class="c-green">&#x2713;</span>               <span class="c-green">&#x2713;</span>                    <span class="c-green">&#x2713;</span>
-debug         <span class="c-green">&#x2713;</span>               <span class="c-red">&#x2717;</span>                    <span class="c-green">&#x2713;</span>
-featureFlags  <span class="c-green">&#x2713;</span>               <span class="c-green">&#x2713;</span>                    <span class="c-red">&#x2717;</span>
+───────────── ─────────────── ──────────────────── ──────────────────────
+apiUrl        <span class="c-green">✓</span>               <span class="c-green">✓</span>                    <span class="c-green">✓</span>
+production    <span class="c-green">✓</span>               <span class="c-green">✓</span>                    <span class="c-green">✓</span>
+debug         <span class="c-green">✓</span>               <span class="c-red">✗</span>                    <span class="c-green">✓</span>
+featureFlags  <span class="c-green">✓</span>               <span class="c-green">✓</span>                    <span class="c-red">✗</span>
 
 <span class="c-yellow">Missing Keys Summary</span>
+
   <span class="c-red">environment.prod.ts</span>: missing <span class="c-red">1</span> key(s)
-    - debug`,
-
-      'debt-log': `<span class="c-green">$ npx ngtk debt-log</span>
-
-Type    Age            Author          Message                                    Location
-─────── ────────────── ─────────────── ────────────────────────────────────────── ─────────────────────
-<span class="c-red">FIXME</span>   2 years ago    john.doe        Race condition in auth refresh              src/auth/auth.service.ts:42
-<span class="c-yellow">TODO</span>    8 months ago   jane.smith      Add proper error handling for file upload   src/upload/upload.component.ts:89
-<span class="c-yellow">TODO</span>    3 months ago   john.doe        Migrate to standalone component             src/shared/header/header.component.ts:12
-<span class="c-magenta">HACK</span>    2 months ago   jane.smith      Workaround for zone.js timing issue        src/core/init.service.ts:55
-<span class="c-yellow">TODO</span>    1 month ago    john.doe        Implement pagination                       src/users/users.component.ts:31
-
-5 debt items: <span class="c-yellow">3 TODO</span>, <span class="c-red">1 FIXME</span>, <span class="c-magenta">1 HACK</span>`,
+    - debug
+  <span class="c-red">environment.staging.ts</span>: missing <span class="c-red">1</span> key(s)
+    - featureFlags`,
 
       'dead-css': `<span class="c-green">$ npx ngtk dead-css</span>
 
-Component                    Declared  Used  Unused  Dead Classes
-──────────────────────────── ───────── ───── ─────── ─────────────────────────
-HeaderComponent              12        9     3       .header-legacy, .nav-old, .logo-sm
-UserCardComponent            8         6     2       .card-shadow-v1, .avatar-border
-DashboardComponent           15        15    0
-SettingsComponent            6         4     2       .form-hint, .btn-reset
+Component            Declared  Used  Unused
+──────────────────── ───────── ───── ───────
+<span class="c-cyan">HeaderComponent</span>      12        9     <span class="c-red">3</span>
+<span class="c-cyan">UserCardComponent</span>    8         6     <span class="c-red">2</span>
+<span class="c-cyan">SettingsComponent</span>    6         4     <span class="c-red">2</span>
 
-<span class="c-yellow">4</span> components scanned, <span class="c-red">7</span> dead CSS classes found`,
+<span class="c-cyan">HeaderComponent</span> (src/header/header.component.scss):
+  <span class="c-red">-</span> .header-legacy
+  <span class="c-red">-</span> .nav-old
+  <span class="c-red">-</span> .logo-sm
 
-      'compat': `<span class="c-green">$ npx ngtk compat-matrix</span>
+<span class="c-cyan">UserCardComponent</span> (src/users/user-card.component.scss):
+  <span class="c-red">-</span> .card-shadow-v1
+  <span class="c-red">-</span> .avatar-border
+
+Found <span class="c-red">7</span> unused CSS class(es) across <span class="c-yellow">3</span> component(s).`,
+
+      'orphans': `<span class="c-green">$ npx ngtk orphans</span>
+
+File                                        Ext    Size
+─────────────────────────────────────────── ────── ──────
+src/shared/old-dialog/old-dialog.component.ts  <span class="c-yellow">.ts</span>    3.2 KB
+src/shared/old-dialog/old-dialog.component.html <span class="c-yellow">.html</span>  1.1 KB
+src/utils/legacy-helpers.ts                 <span class="c-yellow">.ts</span>    2.8 KB
+src/assets/styles/theme-v1.scss             <span class="c-yellow">.scss</span>  4.5 KB
+src/core/unused-interceptor.ts              <span class="c-yellow">.ts</span>    1.4 KB
+
+Found <span class="c-yellow">5</span> orphan file(s). Total recoverable size: <span class="c-cyan">13.0 KB</span>`,
+
+      'component-weight': `<span class="c-green">$ npx ngtk component-weight</span>
+
+<span class="c-cyan">Component Weight Ranking</span>
+<span class="c-muted">47 components found</span>
+
+#   Component                TypeScript  Template  Style   Total
+─── ──────────────────────── ─────────── ───────── ─────── ──────────
+1   <span class="c-white">DashboardComponent</span>       8.4 KB      5.2 KB    3.1 KB  <span class="c-cyan">16.7 KB</span>
+2   <span class="c-white">UserListComponent</span>        6.1 KB      4.8 KB    2.4 KB  <span class="c-cyan">13.3 KB</span>
+3   <span class="c-white">SettingsPageComponent</span>    5.9 KB      3.7 KB    1.9 KB  <span class="c-cyan">11.5 KB</span>
+4   <span class="c-white">ReportBuilderComponent</span>   7.2 KB      2.1 KB    1.8 KB  <span class="c-cyan">11.1 KB</span>
+5   <span class="c-white">HeaderComponent</span>          3.2 KB      1.4 KB    2.8 KB  <span class="c-cyan">7.4 KB</span>
+    ...
+    <span class="c-yellow">TOTAL</span>                    182.3 KB    96.4 KB   74.1 KB <span class="c-yellow">352.8 KB</span>
+    <span class="c-muted">AVG</span>                      <span class="c-muted">3.9 KB</span>      <span class="c-muted">2.1 KB</span>    <span class="c-muted">1.6 KB</span>  <span class="c-muted">7.5 KB</span>`,
+
+      'dep-map': `<span class="c-green">$ npx ngtk dep-map</span>
+
+<span class="c-cyan">Dependency Map</span>
+<span class="c-muted">34 total dependencies</span>
+
+Package                    Version    Type  Category
+────────────────────────── ────────── ───── ──────────────
+@angular/animations        ^18.2.0    prod  <span class="c-cyan">angular</span>
+@angular/common            ^18.2.0    prod  <span class="c-cyan">angular</span>
+@angular/core              ^18.2.0    prod  <span class="c-cyan">angular</span>
+@angular/forms             ^18.2.0    prod  <span class="c-cyan">angular</span>
+@angular/router            ^18.2.0    prod  <span class="c-cyan">angular</span>
+@ngrx/store                ^18.0.0    prod  <span class="c-yellow">ecosystem</span>
+@ngrx/effects              ^18.0.0    prod  <span class="c-yellow">ecosystem</span>
+rxjs                       ~7.8.1     prod  <span class="c-yellow">ecosystem</span>
+zone.js                    ~0.14.4    prod  <span class="c-yellow">ecosystem</span>
+date-fns                   ^3.6.0     prod  <span class="c-muted">generic</span>
+lodash-es                  ^4.17.21   prod  <span class="c-muted">generic</span>
+...
+
+  <span class="c-cyan">Angular:</span> 8  <span class="c-yellow">Ecosystem:</span> 6  <span class="c-muted">Generic:</span> 20`,
+
+      'empty-barrel': `<span class="c-green">$ npx ngtk empty-barrel</span>
+
+File                                          Type           Reason
+───────────────────────────────────────────── ────────────── ─────────────────────────────
+src/auth/auth.component.scss                  <span class="c-magenta">empty-style</span>    Stylesheet is empty or contains only comments
+src/core/core.component.html                  <span class="c-cyan">empty-template</span> Template is empty or contains only placeholder content
+src/shared/logger/logger.service.ts           <span class="c-red">empty-service</span>  Service "LoggerService" has no methods
+src/users/user-card/user-card.component.scss  <span class="c-magenta">empty-style</span>    Stylesheet is empty or contains only comments
+src/users/user-form/user-form.component.spec.ts <span class="c-yellow">trivial-spec</span>  Spec only contains a trivial "should create" test
+
+Found <span class="c-yellow">5</span> boilerplate file(s): <span class="c-yellow">1</span> empty-service, <span class="c-magenta">2</span> empty-style, <span class="c-cyan">1</span> empty-template, <span class="c-yellow">1</span> trivial-spec`,
+
+      'component-catalog': `<span class="c-green">$ npx ngtk component-catalog</span>
+
+Name                      Selector                  Standalone  Path
+───────────────────────── ───────────────────────── ─────────── ────────────────────────────────
+AppComponent              app-root                  <span class="c-green">✓</span>           src/app/app.component.ts
+DashboardComponent        app-dashboard             <span class="c-green">✓</span>           src/dashboard/dashboard.component.ts
+HeaderComponent           app-header                <span class="c-green">✓</span>           src/shared/header/header.component.ts
+LegacyModalComponent      app-legacy-modal          <span class="c-red">✗</span>           src/shared/legacy-modal/legacy-modal.component.ts
+UserCardComponent         app-user-card             <span class="c-green">✓</span>           src/users/user-card/user-card.component.ts
+UserFormComponent         app-user-form             <span class="c-green">✓</span>           src/users/user-form/user-form.component.ts
+UserListComponent         app-user-list             <span class="c-red">✗</span>           src/users/user-list/user-list.component.ts
+
+47 components: <span class="c-green">38</span> standalone, <span class="c-yellow">9</span> module-based
+Standalone ratio: ████████░░ 81%`,
+
+      'compat-matrix': `<span class="c-green">$ npx ngtk compat-matrix</span>
 
 <span class="c-cyan">Angular Stack — v18 detected</span>
 
@@ -592,12 +796,24 @@ SettingsComponent            6         4     2       .form-hint, .btn-reset
 
 Package          Current    Compatible  Recommended
 ──────────────── ────────── ────────── ────────────
-@angular/core    ^18.2.0    <span class="c-green">&#x2713;</span>           —
-typescript       ~5.4.5     <span class="c-green">&#x2713;</span>           —
-rxjs             ~7.8.1     <span class="c-green">&#x2713;</span>           —
-zone.js          ~0.14.4    <span class="c-green">&#x2713;</span>           —
-@angular/cli     ^18.2.0    <span class="c-green">&#x2713;</span>           —
-node             20.11.0    <span class="c-green">&#x2713;</span>           —`,
+@angular/core    ^18.2.0    <span class="c-green">✓</span>           —
+typescript       ~5.4.5     <span class="c-green">✓</span>           —
+rxjs             ~7.8.1     <span class="c-green">✓</span>           —
+zone.js          ~0.14.4    <span class="c-green">✓</span>           —
+@angular/cli     ^18.2.0    <span class="c-green">✓</span>           —
+node             20.11.0    <span class="c-green">✓</span>           —`,
+
+      'debt-log': `<span class="c-green">$ npx ngtk debt-log</span>
+
+Type    Age            Author          Message                                    Location
+─────── ────────────── ─────────────── ────────────────────────────────────────── ──────────────────────────────────────
+<span class="c-red">FIXME</span>   2 years ago    john.doe        Race condition in auth refresh              src/auth/auth.service.ts:42
+<span class="c-yellow">TODO</span>    8 months ago   jane.smith      Add proper error handling for file upload   src/upload/upload.component.ts:89
+<span class="c-yellow">TODO</span>    3 months ago   john.doe        Migrate to standalone component             src/shared/header/header.component.ts:12
+<span class="c-magenta">HACK</span>    2 months ago   jane.smith      Workaround for zone.js timing issue        src/core/init.service.ts:55
+<span class="c-yellow">TODO</span>    1 month ago    john.doe        Implement pagination                       src/users/users.component.ts:31
+
+5 debt items: <span class="c-yellow">3 TODO</span>, <span class="c-red">1 FIXME</span>, <span class="c-magenta">1 HACK</span>`,
     };
 
     function initDemoTabs() {
@@ -628,17 +844,15 @@ node             20.11.0    <span class="c-green">&#x2713;</span>           —`
     function copyCmd(btn) {
       const cmd = btn.previousElementSibling.textContent;
       navigator.clipboard.writeText(cmd).then(() => {
-        btn.textContent = '\u2705';
-        setTimeout(() => { btn.textContent = '\uD83D\uDCCB'; }, 1500);
+        btn.textContent = '✅';
+        setTimeout(() => { btn.textContent = '📋'; }, 1500);
       });
     }
 
     // ===== FADE-IN ON SCROLL =====
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('visible');
       });
     }, { threshold: 0.1 });
 
