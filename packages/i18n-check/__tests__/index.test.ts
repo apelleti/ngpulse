@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/i18n-check', () => {
+describe('@ngpulse/i18n-check', () => {
   let output: string[];
   const originalLog = console.log;
 

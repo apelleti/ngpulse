@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/env-compare', () => {
+describe('@ngpulse/env-compare', () => {
   let output: string[];
   const originalLog = console.log;
 

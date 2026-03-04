@@ -12,7 +12,7 @@ import {
   boxDraw,
   colorize,
   progressBar,
-} from '@ngtk/shared';
+} from '@ngpulse/shared';
 
 interface InfoData {
   project: { name: string; type: string };

@@ -5,7 +5,7 @@ import {
   readFileContent,
   createTable,
   colorize,
-} from '@ngtk/shared';
+} from '@ngpulse/shared';
 
 interface EnvFileKeys {
   filePath: string;

@@ -5,8 +5,8 @@ import {
   getServices,
   createTable,
   colorize,
-} from '@ngtk/shared';
-import type { GlobalOptions, EmptyBarrel } from '@ngtk/shared';
+} from '@ngpulse/shared';
+import type { GlobalOptions, EmptyBarrel } from '@ngpulse/shared';
 
 function isEmptyScss(content: string): boolean {
   // Strip single-line comments

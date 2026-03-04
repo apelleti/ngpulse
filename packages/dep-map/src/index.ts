@@ -5,7 +5,7 @@ import {
   readFileContent,
   createTable,
   colorize,
-} from '@ngtk/shared';
+} from '@ngpulse/shared';
 
 const ECOSYSTEM_PATTERNS = [
   /^rxjs$/,

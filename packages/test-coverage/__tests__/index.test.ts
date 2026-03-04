@@ -25,7 +25,7 @@ const MOCK_COVERAGE = {
   },
 };
 
-describe('@ngtk/test-coverage', () => {
+describe('@ngpulse/test-coverage', () => {
   let output: string[];
   let tmpWithCoverage: string;
   const originalLog = console.log;

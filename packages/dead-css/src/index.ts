@@ -4,8 +4,8 @@ import {
   readFileContent,
   createTable,
   colorize,
-} from '@ngtk/shared';
-import type { GlobalOptions, DeadCssResult } from '@ngtk/shared';
+} from '@ngpulse/shared';
+import type { GlobalOptions, DeadCssResult } from '@ngpulse/shared';
 
 const PSEUDO_CLASSES = new Set([
   'hover', 'focus', 'active', 'visited', 'first-child', 'last-child',

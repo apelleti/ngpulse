@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/component-weight', () => {
+describe('@ngpulse/component-weight', () => {
   let output: string[];
   const originalLog = console.log;
 

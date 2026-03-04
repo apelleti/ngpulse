@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/compat-matrix', () => {
+describe('@ngpulse/compat-matrix', () => {
   let output: string[];
   const originalLog = console.log;
 

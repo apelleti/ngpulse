@@ -6,7 +6,7 @@ import {
   createTable,
   progressBar,
   colorize,
-} from '@ngtk/shared';
+} from '@ngpulse/shared';
 
 export async function run(options: GlobalOptions): Promise<void> {
   if (options.verbose) console.error('Scanning component files...');

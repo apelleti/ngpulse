@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/component-catalog', () => {
+describe('@ngpulse/component-catalog', () => {
   let output: string[];
   const originalLog = console.log;
 

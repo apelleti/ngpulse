@@ -2,8 +2,8 @@ import {
   scanFiles,
   readFileContent,
   colorize,
-} from '@ngtk/shared';
-import type { GlobalOptions, RouteNode } from '@ngtk/shared';
+} from '@ngpulse/shared';
+import type { GlobalOptions, RouteNode } from '@ngpulse/shared';
 
 function parseRouteObjects(content: string): RouteNode[] {
   // Remove single-line comments

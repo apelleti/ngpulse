@@ -7,7 +7,7 @@ import {
   createTable,
   colorize,
   formatBytes,
-} from '@ngtk/shared';
+} from '@ngpulse/shared';
 
 async function findAssociatedFile(
   componentPath: string,

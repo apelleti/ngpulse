@@ -22,7 +22,7 @@ import {
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/shared', () => {
+describe('@ngpulse/shared', () => {
   it('scanFiles finds .ts files', async () => {
     const files = await scanFiles(FIXTURES, ['**/*.component.ts']);
     expect(files.length).toBeGreaterThan(0);

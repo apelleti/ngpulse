@@ -1,6 +1,6 @@
 # ngtk
 
-[![npm version](https://img.shields.io/npm/v/@ngtk/cli.svg)](https://www.npmjs.com/package/@ngtk/cli)
+[![npm version](https://img.shields.io/npm/v/@ngpulse/cli.svg)](https://www.npmjs.com/package/@ngpulse/cli)
 [![CI](https://github.com/apelleti/ngtk/actions/workflows/ci.yml/badge.svg)](https://github.com/apelleti/ngtk/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-3178c6.svg)](https://www.typescriptlang.org/)
@@ -73,9 +73,9 @@ npx ngtk <command>
 **Or install globally:**
 
 ```bash
-npm install -g @ngtk/cli
+npm install -g @ngpulse/cli
 # or
-pnpm add -g @ngtk/cli
+pnpm add -g @ngpulse/cli
 ```
 
 ## Commands
@@ -160,7 +160,7 @@ pnpm build
 pnpm test
 ```
 
-The project is a pnpm workspace monorepo. Each command lives in its own package under `packages/`, with shared utilities in `@ngtk/shared`.
+The project is a pnpm workspace monorepo. Each command lives in its own package under `packages/`, with shared utilities in `@ngpulse/shared`.
 
 ```
 packages/

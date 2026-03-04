@@ -26,7 +26,7 @@ async function runCli(args: string[]): Promise<{ stdout: string; stderr: string;
   }
 }
 
-describe('@ngtk/cli', () => {
+describe('@ngpulse/cli', () => {
   it('--version returns the version from package.json', async () => {
     const { stdout } = await runCli(['-V']);
     expect(stdout.trim()).toMatch(/^\d+\.\d+\.\d+$/);

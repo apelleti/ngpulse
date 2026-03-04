@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/signal-migrate', () => {
+describe('@ngpulse/signal-migrate', () => {
   let output: string[];
   const originalLog = console.log;
 

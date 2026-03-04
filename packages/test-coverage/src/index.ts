@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
-import type { GlobalOptions } from '@ngtk/shared';
-import { colorize, createTable, boxDraw } from '@ngtk/shared';
+import type { GlobalOptions } from '@ngpulse/shared';
+import { colorize, createTable, boxDraw } from '@ngpulse/shared';
 
 interface FileCoverage {
   file: string;

@@ -1,5 +1,5 @@
 {
-  "name": "@ngtk/migration-hints",
+  "name": "@ngpulse/migration-hints",
   "version": "0.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -7,7 +7,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@ngtk/shared": "workspace:*"
+    "@ngpulse/shared": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

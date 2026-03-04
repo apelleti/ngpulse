@@ -8,7 +8,7 @@ import {
   readFileContent,
   createTable,
   colorize,
-} from '@ngtk/shared';
+} from '@ngpulse/shared';
 
 const execFileAsync = promisify(execFile);
 

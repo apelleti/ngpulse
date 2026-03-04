@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/hardcoded-secrets', () => {
+describe('@ngpulse/hardcoded-secrets', () => {
   let output: string[];
   const originalLog = console.log;
 

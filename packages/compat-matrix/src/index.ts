@@ -6,7 +6,7 @@ import {
   readVersionFromDeps,
   createTable,
   colorize,
-} from '@ngtk/shared';
+} from '@ngpulse/shared';
 
 interface VersionRange {
   min: number[];

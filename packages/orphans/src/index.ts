@@ -6,8 +6,8 @@ import {
   createTable,
   formatBytes,
   colorize,
-} from '@ngtk/shared';
-import type { GlobalOptions, OrphanFile } from '@ngtk/shared';
+} from '@ngpulse/shared';
+import type { GlobalOptions, OrphanFile } from '@ngpulse/shared';
 
 const EXCLUDED_BASENAMES = new Set([
   'main.ts',

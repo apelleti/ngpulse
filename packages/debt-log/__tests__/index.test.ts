@@ -6,7 +6,7 @@ import { run } from '../src/index';
 
 const FIXTURES = path.resolve(__dirname, '../../../fixtures');
 
-describe('@ngtk/debt-log', () => {
+describe('@ngpulse/debt-log', () => {
   let output: string[];
   const originalLog = console.log;
 

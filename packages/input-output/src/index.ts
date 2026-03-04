@@ -1,6 +1,6 @@
 import * as path from 'node:path';
-import type { GlobalOptions } from '@ngtk/shared';
-import { scanFiles, readFileContent, colorize, createTable, boxDraw } from '@ngtk/shared';
+import type { GlobalOptions } from '@ngpulse/shared';
+import { scanFiles, readFileContent, colorize, createTable, boxDraw } from '@ngpulse/shared';
 
 interface InputOutputEntry {
   component: string;

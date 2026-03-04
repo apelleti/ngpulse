@@ -1,6 +1,6 @@
 import * as path from 'node:path';
-import type { GlobalOptions } from '@ngtk/shared';
-import { scanFiles, readFileContent, colorize, boxDraw } from '@ngtk/shared';
+import type { GlobalOptions } from '@ngpulse/shared';
+import { scanFiles, readFileContent, colorize, boxDraw } from '@ngpulse/shared';
 
 const IMPORT_RE = /(?:import\s+.*?from\s+['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\))/g;
 

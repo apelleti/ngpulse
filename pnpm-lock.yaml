@@ -35,73 +35,73 @@ importers:
 
   packages/circular-deps:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/cli:
     dependencies:
-      '@ngtk/circular-deps':
+      '@ngpulse/circular-deps':
         specifier: workspace:*
         version: link:../circular-deps
-      '@ngtk/compat-matrix':
+      '@ngpulse/compat-matrix':
         specifier: workspace:*
         version: link:../compat-matrix
-      '@ngtk/component-catalog':
+      '@ngpulse/component-catalog':
         specifier: workspace:*
         version: link:../component-catalog
-      '@ngtk/component-weight':
+      '@ngpulse/component-weight':
         specifier: workspace:*
         version: link:../component-weight
-      '@ngtk/dead-css':
+      '@ngpulse/dead-css':
         specifier: workspace:*
         version: link:../dead-css
-      '@ngtk/debt-log':
+      '@ngpulse/debt-log':
         specifier: workspace:*
         version: link:../debt-log
-      '@ngtk/dep-map':
+      '@ngpulse/dep-map':
         specifier: workspace:*
         version: link:../dep-map
-      '@ngtk/empty-barrel':
+      '@ngpulse/empty-barrel':
         specifier: workspace:*
         version: link:../empty-barrel
-      '@ngtk/env-compare':
+      '@ngpulse/env-compare':
         specifier: workspace:*
         version: link:../env-compare
-      '@ngtk/hardcoded-secrets':
+      '@ngpulse/hardcoded-secrets':
         specifier: workspace:*
         version: link:../hardcoded-secrets
-      '@ngtk/i18n-check':
+      '@ngpulse/i18n-check':
         specifier: workspace:*
         version: link:../i18n-check
-      '@ngtk/info':
+      '@ngpulse/info':
         specifier: workspace:*
         version: link:../info
-      '@ngtk/input-output':
+      '@ngpulse/input-output':
         specifier: workspace:*
         version: link:../input-output
-      '@ngtk/migration-hints':
+      '@ngpulse/migration-hints':
         specifier: workspace:*
         version: link:../migration-hints
-      '@ngtk/naming-check':
+      '@ngpulse/naming-check':
         specifier: workspace:*
         version: link:../naming-check
-      '@ngtk/orphans':
+      '@ngpulse/orphans':
         specifier: workspace:*
         version: link:../orphans
-      '@ngtk/route-tree':
+      '@ngpulse/route-tree':
         specifier: workspace:*
         version: link:../route-tree
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
-      '@ngtk/signal-migrate':
+      '@ngpulse/signal-migrate':
         specifier: workspace:*
         version: link:../signal-migrate
-      '@ngtk/style-audit':
+      '@ngpulse/style-audit':
         specifier: workspace:*
         version: link:../style-audit
-      '@ngtk/test-coverage':
+      '@ngpulse/test-coverage':
         specifier: workspace:*
         version: link:../test-coverage
       commander:
@@ -110,97 +110,97 @@ importers:
 
   packages/compat-matrix:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/component-catalog:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/component-weight:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/dead-css:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/debt-log:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/dep-map:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/empty-barrel:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/env-compare:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/hardcoded-secrets:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/i18n-check:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/info:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/input-output:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/migration-hints:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/naming-check:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/orphans:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/route-tree:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
@@ -221,19 +221,19 @@ importers:
 
   packages/signal-migrate:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/style-audit:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/test-coverage:
     dependencies:
-      '@ngtk/shared':
+      '@ngpulse/shared':
         specifier: workspace:*
         version: link:../shared
 
