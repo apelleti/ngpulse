@@ -1,6 +1,7 @@
 import { Project, SyntaxKind, type SourceFile, type ObjectLiteralExpression, type Expression, type ClassDeclaration, type Decorator, type PropertyDeclaration, type ParameterDeclaration } from 'ts-morph';
 
 export type { Project, SourceFile, ClassDeclaration, Decorator, PropertyDeclaration, ParameterDeclaration };
+export { SyntaxKind } from 'ts-morph';
 import type { ComponentMeta, ServiceMeta } from './types';
 import { scanFiles } from './fs';
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { run } from '../src/index';
@@ -10,20 +10,19 @@ function cleanup() {
   if (fs.existsSync(REPORT_PATH)) fs.unlinkSync(REPORT_PATH);
 }
 
-describe('@ngpulse/report', () => {
-  let output: string[];
-  const originalLog = console.log;
+async function captureLog(fn: () => Promise<void>): Promise<string[]> {
+  const lines: string[] = [];
+  const orig = console.log;
+  console.log = (...args: unknown[]) => lines.push(args.map(String).join(' '));
+  try { await fn(); } finally { console.log = orig; }
+  return lines;
+}
 
-  afterEach(() => {
-    console.log = originalLog;
-    cleanup();
-  });
+describe('@ngpulse/report', () => {
+  afterEach(cleanup);
 
   it('generates an HTML report file', async () => {
-    output = [];
-    console.log = (...args: unknown[]) => { output.push(args.map(String).join(' ')); };
-    await run({ root: FIXTURES, json: false, verbose: false, more: false });
-    console.log = originalLog;
+    await captureLog(() => run({ root: FIXTURES, json: false, verbose: false, more: false }));
 
     expect(fs.existsSync(REPORT_PATH)).toBe(true);
     const html = fs.readFileSync(REPORT_PATH, 'utf-8');
@@ -34,10 +33,8 @@ describe('@ngpulse/report', () => {
   });
 
   it('HTML contains key sections', async () => {
-    output = [];
-    console.log = (...args: unknown[]) => { output.push(args.map(String).join(' ')); };
-    await run({ root: FIXTURES, json: false, verbose: false, more: false });
-    console.log = originalLog;
+    // Generate independently — no dependency on test ordering
+    await captureLog(() => run({ root: FIXTURES, json: false, verbose: false, more: false }));
 
     const html = fs.readFileSync(REPORT_PATH, 'utf-8');
     expect(html).toContain('Standalone');
@@ -48,12 +45,9 @@ describe('@ngpulse/report', () => {
   });
 
   it('JSON mode returns consolidated data', async () => {
-    output = [];
-    console.log = (...args: unknown[]) => { output.push(args.map(String).join(' ')); };
-    await run({ root: FIXTURES, json: true, verbose: false, more: false });
-    console.log = originalLog;
+    const lines = await captureLog(() => run({ root: FIXTURES, json: true, verbose: false, more: false }));
 
-    const data = JSON.parse(output.join('\n'));
+    const data = JSON.parse(lines.join('\n'));
     expect(data['info']).toBeDefined();
     expect(data['debt-log']).toBeDefined();
     expect(data['orphans']).toBeDefined();

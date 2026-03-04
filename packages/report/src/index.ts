@@ -10,22 +10,38 @@ async function captureJsonOutput(
   pkg: PackageModule,
   options: GlobalOptions,
 ): Promise<unknown> {
+  // Temporarily redirect console.log to capture JSON output.
+  // Uses a try/finally to guarantee restoration even on errors.
+  // Note: this is not safe for concurrent calls — each run() is sequential here.
   const origLog = console.log;
+  const origError = console.error;
   const chunks: string[] = [];
   console.log = (...args: unknown[]) => {
     chunks.push(args.map(String).join(' '));
   };
+  // Suppress console.error from sub-packages during capture
+  console.error = () => {};
   try {
-    await pkg.run({ ...options, json: true });
+    await pkg.run({ ...options, json: true, verbose: false });
+  } catch {
+    // package failed — return null, report continues with other packages
+    return null;
   } finally {
     console.log = origLog;
+    console.error = origError;
   }
   const raw = chunks.join('\n').trim();
   if (!raw) return null;
+  // Find the last valid JSON object/array in the output (some packages may print warnings first)
+  const jsonStart = raw.lastIndexOf('{') !== -1 || raw.lastIndexOf('[') !== -1
+    ? Math.max(raw.lastIndexOf('{'), raw.lastIndexOf('['))
+    : -1;
+  const candidate = jsonStart >= 0 ? raw.slice(raw.indexOf(raw[jsonStart])) : raw;
   try {
-    return JSON.parse(raw);
+    return JSON.parse(candidate);
   } catch {
-    return null;
+    // Try the full raw output as last resort
+    try { return JSON.parse(raw); } catch { return null; }
   }
 }
 

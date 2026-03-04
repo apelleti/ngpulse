@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import type { GlobalOptions } from '@ngpulse/shared';
 import {
+  SyntaxKind,
   scanFiles,
   readFileContent,
   colorize,
@@ -199,7 +200,7 @@ export async function run(options: GlobalOptions): Promise<void> {
 
     // Also handle dynamic imports: import('...')
     sf.forEachDescendant((node) => {
-      if (node.getKind() === 213 /* CallExpression */) {
+      if (node.getKind() === SyntaxKind.CallExpression) {
         const text = node.getText();
         const dynamicMatch = text.match(/^import\s*\(\s*['"]([^'"]+)['"]\s*\)/);
         if (dynamicMatch) {

@@ -1,7 +1,9 @@
 import * as path from 'node:path';
+import * as fs from 'node:fs';
 import type { GlobalOptions } from '@ngpulse/shared';
 import {
   scanFiles,
+  readFileContent,
   colorize,
   createTable,
   boxDraw,
@@ -37,6 +39,22 @@ const FILE_SUFFIX_MAP: Record<string, string> = {
   Injectable: '.service.ts',
 };
 
+async function readPrefixFromAngularJson(root: string): Promise<string | null> {
+  const angularJsonPath = path.join(root, 'angular.json');
+  if (!fs.existsSync(angularJsonPath)) return null;
+  try {
+    const json = JSON.parse(await readFileContent(angularJsonPath));
+    for (const proj of Object.values(json.projects || {}) as Record<string, unknown>[]) {
+      const prefix = (proj as { prefix?: string }).prefix;
+      if (prefix && typeof prefix === 'string') return prefix;
+      const schematicsPrefix = (proj as { schematics?: Record<string, Record<string, string>> })
+        ?.schematics?.['@schematics/angular:component']?.prefix;
+      if (schematicsPrefix) return schematicsPrefix;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 function detectPrefix(selectors: string[]): string {
   if (selectors.length === 0) return 'app';
   const prefixes = new Map<string, number>();
@@ -70,6 +88,9 @@ export async function run(options: GlobalOptions): Promise<void> {
   const sfList = addSourceFiles(project, tsFiles);
   const violations: NamingViolation[] = [];
 
+  // Try to read prefix from angular.json first, then fall back to inference
+  const angularJsonPrefix = await readPrefixFromAngularJson(root);
+
   // First pass: collect selectors from @Component classes to detect common prefix
   const selectors: string[] = [];
   for (const sf of sfList) {
@@ -82,7 +103,7 @@ export async function run(options: GlobalOptions): Promise<void> {
       }
     }
   }
-  const expectedPrefix = detectPrefix(selectors);
+  const expectedPrefix = angularJsonPrefix ?? detectPrefix(selectors);
 
   // Second pass: check all files
   for (const sf of sfList) {
