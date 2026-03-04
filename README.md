@@ -40,36 +40,6 @@ npx @ngpulse/cli info
 
 ---
 
-```
-╭─────────────────────────────────────────────────────────╮
-│                                                         │
-│   Project                                               │
-│     Name:         my-app                                │
-│     Type:         application                           │
-│                                                         │
-│   Versions                                              │
-│     Angular:      ^18.2.0 (installed: 18.2.13)         │
-│     TypeScript:   ~5.5.0                                │
-│     Node:         v20.11.0                              │
-│     Pkg Manager:  pnpm                                  │
-│     Build Tool:   esbuild                               │
-│                                                         │
-│   Artifact Counts                                       │
-│     Components:     47                                  │
-│     Services:       18                                  │
-│     Guards:          4                                  │
-│     Modules:         6                                  │
-│                                                         │
-│   Health Indicators                                     │
-│     Standalone:   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 78%  (37/47)   │
-│     Signals:      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 61%  (29/47)   │
-│     Lazy Routes:  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 90%  (18/20)   │
-│                                                         │
-╰─────────────────────────────────────────────────────────╯
-```
-
----
-
 ## Why ngpulse?
 
 Joining a new Angular project means spending hours piecing together the state of the codebase. What version is it on? How much of it is still NgModule-based? Where's the tech debt piling up?
