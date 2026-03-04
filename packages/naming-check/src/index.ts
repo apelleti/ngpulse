@@ -1,6 +1,16 @@
 import * as path from 'node:path';
 import type { GlobalOptions } from '@ngpulse/shared';
-import { scanFiles, readFileContent, colorize, createTable, boxDraw } from '@ngpulse/shared';
+import {
+  scanFiles,
+  colorize,
+  createTable,
+  boxDraw,
+  createProject,
+  addSourceFiles,
+  getClasses,
+  getDecorator,
+  getDecoratorProp,
+} from '@ngpulse/shared';
 
 interface NamingViolation {
   file: string;
@@ -9,20 +19,23 @@ interface NamingViolation {
   message: string;
 }
 
-interface FileCheck {
-  suffix: string;
+interface DecoratorCheck {
+  decorator: string;
   classSuffix: string;
-  classRe: RegExp;
-  type: string;
 }
 
-const FILE_CHECKS: FileCheck[] = [
-  { suffix: '.component.ts', classSuffix: 'Component', classRe: /class\s+(\w+)/, type: 'Component' },
-  { suffix: '.service.ts', classSuffix: 'Service', classRe: /class\s+(\w+)/, type: 'Service' },
-  { suffix: '.pipe.ts', classSuffix: 'Pipe', classRe: /class\s+(\w+)/, type: 'Pipe' },
-  { suffix: '.directive.ts', classSuffix: 'Directive', classRe: /class\s+(\w+)/, type: 'Directive' },
-  { suffix: '.guard.ts', classSuffix: 'Guard', classRe: /class\s+(\w+)/, type: 'Guard' },
+const DECORATOR_CHECKS: DecoratorCheck[] = [
+  { decorator: 'Component', classSuffix: 'Component' },
+  { decorator: 'Injectable', classSuffix: 'Service' },
+  { decorator: 'Pipe', classSuffix: 'Pipe' },
+  { decorator: 'Directive', classSuffix: 'Directive' },
+  { decorator: 'NgModule', classSuffix: 'Module' },
 ];
+
+const FILE_SUFFIX_MAP: Record<string, string> = {
+  Component: '.component.ts',
+  Injectable: '.service.ts',
+};
 
 function detectPrefix(selectors: string[]): string {
   if (selectors.length === 0) return 'app';
@@ -53,93 +66,110 @@ export async function run(options: GlobalOptions): Promise<void> {
     (f) => !f.endsWith('.spec.ts') && !f.endsWith('.test.ts') && !f.endsWith('.d.ts'),
   );
 
+  const project = createProject();
+  const sfList = addSourceFiles(project, tsFiles);
   const violations: NamingViolation[] = [];
 
-  // First pass: collect selectors to detect common prefix
+  // First pass: collect selectors from @Component classes to detect common prefix
   const selectors: string[] = [];
-  for (const file of tsFiles) {
-    if (!file.endsWith('.component.ts')) continue;
-    const content = await readFileContent(file);
-    const selectorMatch = content.match(/selector\s*:\s*['"`]([^'"`]+)['"`]/);
-    if (selectorMatch) selectors.push(selectorMatch[1]);
+  for (const sf of sfList) {
+    for (const cls of getClasses(sf)) {
+      const compDec = getDecorator(cls, 'Component');
+      if (!compDec) continue;
+      const selectorVal = getDecoratorProp(compDec, 'selector');
+      if (selectorVal) {
+        selectors.push(selectorVal.replace(/^['"`]|['"`]$/g, ''));
+      }
+    }
   }
   const expectedPrefix = detectPrefix(selectors);
 
   // Second pass: check all files
-  for (const file of tsFiles) {
-    const content = await readFileContent(file);
-    const relPath = path.relative(root, file);
-    const lines = content.split('\n');
+  for (const sf of sfList) {
+    const filePath = sf.getFilePath();
+    const relPath = path.relative(root, filePath);
+    const baseName = path.basename(filePath);
 
-    // Check class naming conventions
-    for (const check of FILE_CHECKS) {
-      if (!file.endsWith(check.suffix)) continue;
+    for (const cls of getClasses(sf)) {
+      const className = cls.getName() || '';
 
-      for (let i = 0; i < lines.length; i++) {
-        const classMatch = lines[i].match(check.classRe);
-        if (classMatch) {
-          const className = classMatch[1];
-          if (!className.endsWith(check.classSuffix)) {
+      // Check class suffix conventions based on decorators
+      for (const check of DECORATOR_CHECKS) {
+        const dec = getDecorator(cls, check.decorator);
+        if (!dec) continue;
+
+        // For @Injectable, skip guards and interceptors
+        if (check.decorator === 'Injectable') {
+          if (baseName.includes('guard') || baseName.includes('interceptor')) continue;
+          // Check if it implements guard/interceptor interfaces
+          const clsText = cls.getText();
+          if (/implements\s+(?:CanActivate|CanActivateFn|HttpInterceptor)/.test(clsText)) continue;
+          if (clsText.includes('HTTP_INTERCEPTORS')) continue;
+        }
+
+        if (!className.endsWith(check.classSuffix)) {
+          // For file-suffix checks on specific suffixes
+          const expectedSuffix = FILE_SUFFIX_MAP[check.decorator];
+          if (expectedSuffix && !filePath.endsWith(expectedSuffix.replace('.ts', '').replace('.', '') + '.ts')) {
+            // This is a file-suffix violation (e.g. @Component in non-.component.ts file)
+          }
+
+          violations.push({
+            file: relPath,
+            line: cls.getStartLineNumber(),
+            rule: 'class-suffix',
+            message: `Class "${className}" with @${check.decorator} should end with "${check.classSuffix}"`,
+          });
+        }
+      }
+
+      // Check component selector prefix
+      const compDec = getDecorator(cls, 'Component');
+      if (compDec) {
+        const selectorVal = getDecoratorProp(compDec, 'selector');
+        if (selectorVal) {
+          const selector = selectorVal.replace(/^['"`]|['"`]$/g, '');
+          if (!selector.startsWith(`${expectedPrefix}-`)) {
             violations.push({
               file: relPath,
-              line: i + 1,
-              rule: 'class-suffix',
-              message: `Class "${className}" in ${check.suffix} file should end with "${check.classSuffix}"`,
+              line: compDec.getStartLineNumber(),
+              rule: 'selector-prefix',
+              message: `Selector "${selector}" should start with "${expectedPrefix}-"`,
             });
           }
         }
       }
     }
 
-    // Check component selector prefix
-    if (file.endsWith('.component.ts')) {
-      const selectorMatch = content.match(/selector\s*:\s*['"`]([^'"`]+)['"`]/);
-      if (selectorMatch) {
-        const selector = selectorMatch[1];
-        if (!selector.startsWith(`${expectedPrefix}-`)) {
-          const line =
-            lines.findIndex((l) => l.includes(selectorMatch[0])) + 1;
+    // Check file-suffix: @Component not in .component.ts, @Injectable not in .service.ts
+    const isKnownSuffix = ['.component.ts', '.service.ts', '.pipe.ts', '.directive.ts', '.guard.ts'].some(s => filePath.endsWith(s));
+    if (!isKnownSuffix) {
+      for (const cls of getClasses(sf)) {
+        if (getDecorator(cls, 'Component')) {
           violations.push({
             file: relPath,
-            line,
-            rule: 'selector-prefix',
-            message: `Selector "${selector}" should start with "${expectedPrefix}-"`,
+            line: 1,
+            rule: 'file-suffix',
+            message: 'File with @Component should be named *.component.ts',
           });
+        }
+        if (getDecorator(cls, 'Injectable')) {
+          if (!baseName.includes('guard') && !baseName.includes('interceptor')) {
+            const clsText = cls.getText();
+            if (!/implements\s+(?:CanActivate|CanActivateFn|HttpInterceptor)/.test(clsText) && !clsText.includes('HTTP_INTERCEPTORS')) {
+              violations.push({
+                file: relPath,
+                line: 1,
+                rule: 'file-suffix',
+                message: 'File with @Injectable should be named *.service.ts',
+              });
+            }
+          }
         }
       }
     }
 
-    // Check file naming: .component.ts should exist for classes with @Component
-    if (!FILE_CHECKS.some((c) => file.endsWith(c.suffix))) {
-      if (/@Component\s*\(/.test(content)) {
-        violations.push({
-          file: relPath,
-          line: 1,
-          rule: 'file-suffix',
-          message: 'File with @Component should be named *.component.ts',
-        });
-      }
-      const baseName = path.basename(file);
-      if (
-        /@Injectable\s*\(/.test(content) &&
-        !baseName.includes('guard') &&
-        !baseName.includes('interceptor') &&
-        !/implements\s+CanActivate/.test(content) &&
-        !/implements\s+CanActivateFn/.test(content) &&
-        !content.includes('HTTP_INTERCEPTORS') &&
-        !/implements\s+HttpInterceptor/.test(content)
-      ) {
-        violations.push({
-          file: relPath,
-          line: 1,
-          rule: 'file-suffix',
-          message: 'File with @Injectable should be named *.service.ts',
-        });
-      }
-    }
-
-    // Check kebab-case for Angular artifact files
-    const baseName = path.basename(file);
+    // Check kebab-case for file names (keep regex — appropriate for filenames)
     const nameWithoutExt = baseName.replace(/\.(component|service|pipe|directive|guard|module)\.ts$/, '').replace(/\.ts$/, '');
     if (/[A-Z]/.test(nameWithoutExt) || /_/.test(nameWithoutExt)) {
       violations.push({
